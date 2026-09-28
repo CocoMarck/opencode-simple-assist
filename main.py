@@ -4,9 +4,30 @@ import subprocess
 from datetime import datetime
 import json
 import random
+import re
 
 # Palabra clave, para recibir ordenes.
 key_word = "Asistente"
+
+def normalized_text_with_key_word(text: str):
+    return "".join(char for char in text if char.isalpha() or char == " ")
+
+def use_key_word(text:str):
+    key_word = normalized_text_with_key_word(text).lower().split()[0]
+    print("Palabra clave:", key_word)
+    return key_word == key_word.lower()
+
+def remove_key_word(text:str):
+    new_text = ""
+    get_first_coincidence = False
+    for word in text.split():
+        if (
+            normalized_text_with_key_word(word).lower() == key_word.lower() and 
+            not get_first_coincidence):
+            get_first_coincidence = True
+        else:
+            new_text += f"{word} "
+    return new_text[:-1]
 
 # Asegurar sesión fija del dia
 assist_session = f"assist-{datetime.today().strftime('%Y-%m-%d')}"
@@ -54,25 +75,29 @@ if exists:
 
 # Construcción de prompt con `Speech to Text`
 prompt = random.choice([
-    "Dime una frase aleatoria por favor.", 
-    "Dime un dato curioso sobre los seres vivos.",
-    "Dime un dato curioso sobre los mecanismos humanos",
-    "Haz un poco de freestyle"])
+    f"{key_word}, dime una frase aleatoria por favor.",
+    f"{key_word}. Dime un dato curioso sobre los seres vivos.",
+    f"{key_word} dime un dato curioso sobre los mecanismos de la tecnología humana.",
+    f"{key_word}, haz un poco de freestyle."])
+
 
 # Comando a ejecutar, con sesión fija del dia
-if exists:
-    result = subprocess.run([
-        "opencode", "run", "--session", session_id, prompt
-    ], stdout=subprocess.PIPE)
-else:
-    result = subprocess.run([
-        "opencode", "run", "--title", voice_session, prompt
-    ], stdout=subprocess.PIPE)
-
 print("Prompt:", prompt)
+def run_prompt(prompt):
+    if not use_key_word(prompt):
+        raise Exception("Not using the key word")
+    if exists:
+        return subprocess.run([
+            "opencode", "run", "--session", session_id, remove_key_word(prompt)
+        ], stdout=subprocess.PIPE)
+    else:
+        return subprocess.run([
+            "opencode", "run", "--title", assist_session, remove_key_word(prompt)
+        ], stdout=subprocess.PIPE)
+
 
 # Leer output con `Text to Speech`
-def normalize_text(text:str) -> str:
+def normalize_text_to_speech(text:str) -> str:
     '''
     Normalizar texto, algo legible para el TTS.
     '''
@@ -83,7 +108,11 @@ def normalize_text(text:str) -> str:
             normalized_text += char
     return normalized_text
 
+def run_text_to_speech(text: str):
+    espeak_command = f"espeak-ng -v es '{text}'"
+    print(espeak_command)
+    os.system(espeak_command)
 
-espeak_command = f"espeak-ng -v es '{normalize_text(result.stdout.decode('utf-8'))}'"
-print(espeak_command)
-os.system(espeak_command)
+# Debug
+result = run_prompt(prompt)
+run_text_to_speech( normalize_text_to_speech(result.stdout.decode('utf-8')) )
