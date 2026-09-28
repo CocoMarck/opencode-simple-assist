@@ -14,7 +14,7 @@ def normalized_text_with_key_word(text: str):
 
 def use_key_word(text:str):
     key_word = normalized_text_with_key_word(text).lower().split()[0]
-    print("Palabra clave:", key_word)
+    print("Key word:", key_word)
     return key_word == key_word.lower()
 
 def remove_key_word(text:str):
@@ -78,7 +78,8 @@ prompt = random.choice([
     f"{key_word}, dime una frase aleatoria por favor.",
     f"{key_word}. Dime un dato curioso sobre los seres vivos.",
     f"{key_word} dime un dato curioso sobre los mecanismos de la tecnología humana.",
-    f"{key_word}, haz un poco de freestyle."])
+    f"{key_word}, haz un poco de freestyle.",
+    f"{key_word}, dime para que sirven un {key_word}."])
 
 
 # Comando a ejecutar, con sesión fija del dia
@@ -86,13 +87,15 @@ print("Prompt:", prompt)
 def run_prompt(prompt):
     if not use_key_word(prompt):
         raise Exception("Not using the key word")
+    normalized_prompt = remove_key_word(prompt)
+    print("Normalized prompt: ", normalized_prompt)
     if exists:
         return subprocess.run([
-            "opencode", "run", "--session", session_id, remove_key_word(prompt)
+            "opencode", "run", "--session", session_id, normalized_prompt
         ], stdout=subprocess.PIPE)
     else:
         return subprocess.run([
-            "opencode", "run", "--title", assist_session, remove_key_word(prompt)
+            "opencode", "run", "--title", assist_session, normalized_prompt
         ], stdout=subprocess.PIPE)
 
 
