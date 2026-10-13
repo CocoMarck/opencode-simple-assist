@@ -10,7 +10,7 @@ def normalize(text:str) -> str:
     '''
     Normalizar texto, algo legible para el TTS.
     '''
-    limit_long_words = limit_long_words(text)
+    limit_words = limit_long_words(text)
     print("Raw text:", text)
     #print("Limit words:", limit_words)
     normalized_text = ""

@@ -12,6 +12,15 @@ class OpenCodeManager:
             "opencode", "session", "list", "--format", "json"
         ], capture_output=True, text=True)
         return json.loads(result.stdout)
+    
+    def exists_session_by_id(self, id: str) -> bool:
+        session_list = self.get_session_list()
+        exists = False
+        for item in session_list:
+            if item["id"] == id:
+                exists = True
+                break
+        return exists
 
     def exists_session_by_title(self, title: str) -> bool:
         '''
@@ -42,18 +51,19 @@ class OpenCodeManager:
             raise Exception("The session title not exists")
         else:
             return identifier
-    
 
-    def run_prompt_by_title(self, title:str, prompt:str) -> subprocess:
+    def run_by_title(self, title:str, prompt:str) -> subprocess:
         '''
-        Ejecuta un prompt a sesión con titulo especifico
-        Si existe una sesión con ese titulo la usa. Si no la crea.
+        Simple. Crea sesiones. Si ya existe la session con ese titulo, igual crea una nueva.
         '''
-        exists = self.exists_session_by_title(title)
-        if exists:
-            return subprocess.run([
-                "opencode", "run", "--session", self.get_session_id_by_title(title), prompt],
-                stdout=subprocess.PIPE)
-        else:
-            return subprocess.run([
-                "opencode", "run", "--title", title, prompt], stdout=subprocess.PIPE)
+        return subprocess.run([
+            "opencode", "run", "--title", title, prompt], stdout=subprocess.PIPE)
+    
+    def run_by_id(self, session_id:str, prompt: str):
+        '''
+        Simple. Usa sesiones. Si no existe ese ID, crash.
+        '''
+        return subprocess.run([
+            "opencode", "run", "--session", session_id, prompt], 
+            stdout=subprocess.PIPE)
+
