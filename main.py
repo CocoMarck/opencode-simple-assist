@@ -7,19 +7,23 @@ from core.simple_voice_assist import SimpleVoiceAssist
 from tts import markdown
 
 # Palabra clave, para recibir ordenes.
-key_word = "Asistente"
+keyword = "Asistente"
 
 # Inicializar módulos
 open_code_manager = OpenCodeManager()
 espeak_manager = EspeakManager()
-simple_voice_assist = SimpleVoiceAssist(key_word, open_code_manager, espeak_manager)
+simple_voice_assist = SimpleVoiceAssist(keyword, open_code_manager, espeak_manager)
 
 # Construcción de prompt con `Speech to Text`
-prompt = random.choice([
-    f"{key_word}, dime una frase aleatoria por favor.",
-    f"{key_word}. Dime un dato curioso sobre los seres vivos.",
-    f"{key_word} dime un dato curioso sobre los mecanismos de la tecnología humana.",
-    f"{key_word}, haz un poco de freestyle.",
-    f"{key_word}, dime para que sirve un {key_word}."])
+text = random.choice([
+    f"{keyword}, dime una frase aleatoria por favor.",
+    f"{keyword}. Dime un dato curioso sobre los seres vivos.",
+    f"{keyword} dime un dato curioso sobre los mecanismos de la tecnología humana.",
+    f"{keyword}, haz un poco de freestyle.",
+    f"{keyword}, dime para que sirve un {keyword}.",
+    f"{keyword}, abre el navegador predeterminado porfavor. Ya sea una nueva pestaña si es que ya existe un proceso, o uno proceso si es que no hay."])
 
-simple_voice_assist.request_by_text(prompt)
+simple_voice_assist.request_by_keyword(text)
+#text = input("Orden a open code: ")
+#if text:
+    #simple_voice_assist.request(text)
