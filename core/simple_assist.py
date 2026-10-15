@@ -1,4 +1,5 @@
 from datetime import datetime
+import subprocess
 
 # Módulos
 from tts import markdown
@@ -14,6 +15,18 @@ class SimpleAssist:
     def _get_assist_session_title(self):
         return f"assist-{datetime.today().strftime('%Y-%m-%d')}"
     
+    def _normalize_strip_result(self, func: subprocess.run, *args, **kwargs) -> str:
+        try:
+            result = func(*args, **kwargs)
+        except subprocess.TimeoutExpired as exc:
+            print(exc)
+            return "Timeout exception error."
+        except subprocess.CalledProcessError as exc:
+            print(exc)
+            return "Bad call error."
+        return result.stdout.strip()
+
+    
     def request(self, text:str):
         '''
         - Obtiene o crea sesión de asistente.
@@ -23,18 +36,18 @@ class SimpleAssist:
         session_title = self._get_assist_session_title()
         exists_session = self.open_code_manager.exists_session_by_title(session_title)
         print(f"Session title: {session_title}")
-        result = None
+        strip_result = None
         if exists_session:
             print("Existe la sesión")
             session_id = self.open_code_manager.get_session_id_by_title(session_title)
             print(f"Session id: {session_id}")
             
-            result = self.open_code_manager.run_by_id( 
-                session_id=session_id, prompt=text)
+            strip_result = self._normalize_strip_result(
+                self.open_code_manager.run_by_id, session_id=session_id, prompt=text)
         else:
             print("No existe la sesión, creando una nueva.")
-            result = self.open_code_manager.run_by_title( 
-                title=session_title, prompt=text)
+            strip_result = self._normalize_strip_result(
+                self.open_code_manager.run_by_title, title=session_title, prompt=text)
 
-        self.espeak_manager.speak( 
-            markdown.normalize(result.stdout.decode('utf-8')) )
+        print(f"Raw result: \n{strip_result}\n")
+        self.espeak_manager.speak( markdown.normalize(strip_result) )

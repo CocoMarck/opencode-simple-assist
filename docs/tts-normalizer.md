@@ -40,7 +40,7 @@ antes que las rutas.
     y `. , ! ? ¿ ¡`. Esto arrastra emojis y elimina `#`, `>`, `<`.
 11. Colapsar espacios (`\s+` -> un espacio) y `strip()`.
 12. Descartar **tokens de más de 100 caracteres** (regla del `changelog.md`).
-13. Quitar el `print("Raw text:", ...)` de la librería (es depuración).
+13. Descartar pensamientos, bloques de etiquetas, como: `<think></think>`.
 
 ---
 

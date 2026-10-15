@@ -3,9 +3,13 @@ import subprocess, json
 class OpenCodeManager:
     '''
     Simple, prácticamente solo maneja sesiones por title.
+
+    El subprocess de run, sera con los parámetros/flags: check, capture_output, text, y un timeout, para que no espere al infinito.
+    
+    El timeout sera un arma de doble filo, ya que si se le pide abrir algo, y por `x` o `y` razón no puede, o se tarda, sera un problema.
     '''
-    def __init__(self):
-        pass
+    def __init__(self, timeout: float):
+        self._timeout = timeout
     
     def get_session_list(self) -> [dict]:
         result = subprocess.run([
@@ -57,7 +61,8 @@ class OpenCodeManager:
         Simple. Crea sesiones. Si ya existe la session con ese titulo, igual crea una nueva.
         '''
         return subprocess.run([
-            "opencode", "run", "--title", title, prompt], stdout=subprocess.PIPE)
+            "opencode", "run", "--title", title, prompt], 
+            capture_output=True, text=True, timeout=self._timeout)
     
     def run_by_id(self, session_id:str, prompt: str):
         '''
@@ -65,5 +70,5 @@ class OpenCodeManager:
         '''
         return subprocess.run([
             "opencode", "run", "--session", session_id, prompt], 
-            stdout=subprocess.PIPE)
+            capture_output=True, text=True, timeout=self._timeout)
 
