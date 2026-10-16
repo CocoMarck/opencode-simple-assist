@@ -26,12 +26,12 @@ text = random.choice([
     "Abre el navegador predeterminado porfavor. Ya sea una nueva pestaña si es que ya existe un proceso, o uno proceso si es que no hay.",
     "Escribe unas tres lineas de código python. De lo que sea. (Escribe en el chat, no escribas archivos) (Puedes usar tu sandbox para probar)."])
 
-simple_voice_assist.request_by_keyword( f"{keyword}. {text}" )
+#simple_voice_assist.request_by_keyword( f"{keyword}. {text}" )
 #simple_assist.request(text)
 
 # Debug normalize text
 markdown_text = (
-'''
+f'''
 <think>Pensando mucho</think>
 ```python
 palabras = ['hola', 'mundo', 'python']
@@ -49,7 +49,9 @@ Mas código para trolear al normalizer.
 ```
 
 PalabraFalsaDemasiadaLargaParaSerLeidaPorqueEsParaTrolearAlTTSPorqueElTTSTieneLimitesAsíComoLosHumanosJajaSaludosCreoQueYaSonMasDeCienCaracteres
-''')
-if False:
+
+Ahora muchas letras para ver si limita cantidad de palabras: {"a e i o u "*500}
+''' )
+if True:
     print("Raw text:", markdown_text)
     print("Normalized text:", markdown.normalize( markdown_text) )
