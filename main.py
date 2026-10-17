@@ -26,12 +26,14 @@ text = random.choice([
     "Abre el navegador predeterminado porfavor. Ya sea una nueva pestaña si es que ya existe un proceso, o uno proceso si es que no hay.",
     "Escribe unas tres lineas de código python. De lo que sea. (Escribe en el chat, no escribas archivos) (Puedes usar tu sandbox para probar)."])
 
-#simple_voice_assist.request_by_keyword( f"{keyword}. {text}" )
+simple_voice_assist.request_by_keyword( f"{keyword}. {text}" )
 #simple_assist.request(text)
 
 # Debug normalize text
 markdown_text = (
 f'''
+# Texto Markdown para debug.
+
 <think>Pensando mucho</think>
 ```python
 palabras = ['hola', 'mundo', 'python']
@@ -50,8 +52,23 @@ Mas código para trolear al normalizer.
 
 PalabraFalsaDemasiadaLargaParaSerLeidaPorqueEsParaTrolearAlTTSPorqueElTTSTieneLimitesAsíComoLosHumanosJajaSaludosCreoQueYaSonMasDeCienCaracteres
 
-Ahora muchas letras para ver si limita cantidad de palabras: {"a e i o u "*500}
+Una pregunta realista ¿El porque del todo, es algo que importa?, ¿O la pregunta es la que importa?.
+
+Esto que sigue de los dos puntos, no se debe leer: {"@$#*"*10}.
+
+Ahora modo bilingüe: 
+    - 这是中文.
+    - Это русский язык.
+    - זה רוסי.
+    - Kjo është shqipe.
+    - और मैं पहले से ही थक गया हूँ, लेकिन आखिरी उपाय के तौर पर, इंडियन, टेस्टी करी।.
+
+Ahora muchas letras para ver si limita cantidad de palabras: {"a e i o u "*500}.
 ''' )
-if True:
+if False:
     print("Raw text:", markdown_text)
-    print("Normalized text:", markdown.normalize( markdown_text) )
+    if False:
+        espeak_manager.speak(markdown.normalize( markdown_text))
+    else:
+        print("Normalized text:", markdown.normalize( markdown_text) )
+    

@@ -8,9 +8,13 @@ Se puede usar `Regex`, compilados perezosos (lazy). Ejemplo `re.compile(pattern,
 '''
 
 CHARACTER_LIMIT = 100
-WORD_LIMIT = 1000
+WORD_LIMIT = 10000
 CODE_BLOCK_PATTERN = r"```.*?```"
-TAG_PATTERN = r"<.*>"
+
+TAG_BLOCK_PATTERN = r"<([A-Za-z][A-Za-z0-9:_-]*)\b[^>]*>.*?</\1>" # Para `contenido` de `<tag>contenido</tag>`.
+TAG_STANDLONE_PATTERN = r"</?[A-Za-z][^>]*>" # Para esto `<tag>` `</tag>`
+
+LATIN_PUNCTUATION_MARKS = ["?", "¿", ".", ":", ";", ",", "(", ")", "!", "¡"]
     
 def normalize(text:str) -> str:
     '''
@@ -20,11 +24,7 @@ def normalize(text:str) -> str:
     text_without_tags = remove_tags(text_without_code)
     limit_text = limit_long_text(text_without_tags)
     limit_words = limit_long_words(limit_text)
-    normalized_text = ""
-    for char in limit_words:
-        if char.isalnum() or char == " ":
-            normalized_text += char
-    return normalized_text.lower()
+    return readable_text_only(limit_words).lower()
 
 # Limit long word
 def long_word(word: str) -> bool:
@@ -55,7 +55,7 @@ def limit_long_text(text: str) -> str:
     '''
     Limita cantidad de palabras.
     '''
-    if long_word(text):
+    if long_text(text):
         new_text = ""
         words = text.split()
         for i in range(0, len(words)):
@@ -87,13 +87,39 @@ def replace_code_blocks(text: str) -> str:
     return text
 
 # Remove tags
-def get_tags(text: str) -> [str]:
+def get_tags(text: str) -> list[str]:
     '''
-    Obtiene lineas tipo <tag>, o </tag>.
+    Obtiene lineas tipo `<tag>contenido</tag>.`
+    `<tag>` individuales, y su `contenido`.
     '''
-    return re.findall(TAG_PATTERN, text)
+    blocks = [ 
+        m.group(0) 
+        for m in re.finditer(TAG_BLOCK_PATTERN, text, flags=re.DOTALL | re.IGNORECASE) ]
+    singles = [
+        m.group(0) 
+        for m in re.finditer(TAG_STANDLONE_PATTERN, text, flags=re.IGNORECASE) ]
+    tags = []
+    tags.extend(blocks)
+    tags.extend(singles)
+    return tags
 
 def remove_tags(text: str) -> str:
     for i in get_tags(text):
         text = text.replace(i, "")
     return text
+
+# Solo texto legible
+def readable_text_only(string: str):
+    '''
+    Limita el string, a solo texto legible.
+
+    - Espacios.
+    - ABC, Español (solo tiene la ñ como adicional).
+    - Caracteres chinos, o rusos, o árabes, o etc. Eso si lenguas muertas no.
+    - Puntuación (Latin languages): `¿? . , : ;`
+    '''
+    readable_text_only = ""
+    for char in string:
+        if char.isalnum() or char.isspace() or (char in LATIN_PUNCTUATION_MARKS):
+            readable_text_only += char
+    return readable_text_only
