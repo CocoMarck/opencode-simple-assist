@@ -24,7 +24,8 @@ text = random.choice([
     "Haz un poco de freestyle.",
     f"Dime para que sirve un {keyword}.",
     "Abre el navegador predeterminado porfavor. Ya sea una nueva pestaña si es que ya existe un proceso, o uno proceso si es que no hay.",
-    "Escribe unas tres lineas de código python. De lo que sea. (Escribe en el chat, no escribas archivos) (Puedes usar tu sandbox para probar)."])
+    "Escribe unas tres lineas de código python. De lo que sea. (Escribe en el chat, no escribas archivos) (Puedes usar tu sandbox para probar)."
+    "Describe resolución de problema matemático, muy sencillo pero con símbolos matemáticos raros."])
 
 simple_voice_assist.request_by_keyword( f"{keyword}. {text}" )
 #simple_assist.request(text)
@@ -62,6 +63,10 @@ Ahora modo bilingüe:
     - זה רוסי.
     - Kjo është shqipe.
     - और मैं पहले से ही थक गया हूँ, लेकिन आखिरी उपाय के तौर पर, इंडियन, टेस्टी करी।.
+
+Ahora un problema matemático con símbolos raros: x ≔ 15 ⊘ 3 = 5.
+
+La verdad no se como implementar: "∈, "□", "∎", "≔", "ℝ", "⊹". Así que solo los mencionare a lo loco, a espera ya lo hice.
 
 Ahora muchas letras para ver si limita cantidad de palabras: {"a e i o u "*500}.
 ''' )

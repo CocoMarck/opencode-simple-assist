@@ -8,13 +8,51 @@ Se puede usar `Regex`, compilados perezosos (lazy). Ejemplo `re.compile(pattern,
 '''
 
 CHARACTER_LIMIT = 100
-WORD_LIMIT = 10000
+WORD_LIMIT = 1000
 CODE_BLOCK_PATTERN = r"```.*?```"
 
 TAG_BLOCK_PATTERN = r"<([A-Za-z][A-Za-z0-9:_-]*)\b[^>]*>.*?</\1>" # Para `contenido` de `<tag>contenido</tag>`.
 TAG_STANDLONE_PATTERN = r"</?[A-Za-z][^>]*>" # Para esto `<tag>` `</tag>`
 
-LATIN_PUNCTUATION_MARKS = ["?", "¿", ".", ":", ";", ",", "(", ")", "!", "¡"]
+LATIN_SYMBOLS = [
+    "?", "¿", ".", ":", ";", ",", "(", ")", "!", "¡", "&"]
+MATHEMATICAL_SYMBOLS = [
+    # Básicos Mas Menos
+    "+", "-", "−",
+
+    # Básicos Producto
+    "⋅", "×",
+
+    # Básicos División
+    "÷", "/",
+
+    # Básicos Comparadores
+    "=", ">", "<", "≠", "≥", "≤", "⩲", "±", "±",
+
+    # Básicos Porcentaje
+    "%", "‰",
+
+    # Básicos Potencias
+    "√",                       
+
+    # Álgebra
+    "∆", "∑",
+    
+    # Sin ordenar
+    "⊘", "∈", "□", "∎", "≔", "ℝ", "⊹"
+]
+
+math_symbols_tags = {
+    "⊘": "circled division slash", "∈": "belonging", 
+    "□": "tombstone", "∎": "tombstone", "≔": "defined as", "ℝ": "number line", 
+    "⊹": "transposed conjugate matrix"
+}
+
+def get_allowed_special_characters() -> list[str]:
+    '''
+    Retorna una lista de caracteres sin caracteres repetidos.
+    '''
+    return list(set(LATIN_SYMBOLS + MATHEMATICAL_SYMBOLS))
     
 def normalize(text:str) -> str:
     '''
@@ -24,7 +62,8 @@ def normalize(text:str) -> str:
     text_without_tags = remove_tags(text_without_code)
     limit_text = limit_long_text(text_without_tags)
     limit_words = limit_long_words(limit_text)
-    return readable_text_only(limit_words).lower()
+    text_with_redeable_math_symbols = replace_math_symbols(limit_words)
+    return readable_text_only(text_with_redeable_math_symbols).lower()
 
 # Limit long word
 def long_word(word: str) -> bool:
@@ -120,6 +159,14 @@ def readable_text_only(string: str):
     '''
     readable_text_only = ""
     for char in string:
-        if char.isalnum() or char.isspace() or (char in LATIN_PUNCTUATION_MARKS):
+        if (
+            char.isalnum() or char.isspace() or 
+            (char in get_allowed_special_characters()) ):
             readable_text_only += char
     return readable_text_only
+
+# Símbolos matemáticos raros remplazados por texto legible.
+def replace_math_symbols(text: str):
+    for key in math_symbols_tags.keys():
+        text = text.replace(key, math_symbols_tags[key])
+    return text
