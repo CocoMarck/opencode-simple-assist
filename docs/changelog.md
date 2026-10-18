@@ -1,10 +1,14 @@
 # Changelog
 - **LISTO**: Mandarle una ordenes a opencode, con run.
 - **LISTO** TTS, espeak obtiene output de opencode, y lo lee.
-- **FALTA**: Crear sesión fija al dia.
+- **LISTO**: Crear sesión fija al dia.
 - **FALTA**: Construcción de prompt con `Speech to Text` usando vosk.
-- **FALTA**: Palabra clave al principio de frase, para recibir orden. Ejemplo: `Asistente, abre el navegador web.`
-- **FALTA**: Normalizar texto para el TTS. (Especificación en [tts-normalizer.md](./tts-normalizer.md))
+- **LISTO**: Palabra clave al principio de frase, para recibir orden. Ejemplo: `Asistente, abre el navegador web.`. Esto servirá para tener una dizque contraseña.
+- **LISTO**: Normalizar texto para el TTS. (Especificación en [tts-normalizer.md](./tts-normalizer.md))
     - Debe leer ABC, números, símbolos comunes (@,#,>,<), y de matemáticas .
     - No debe leer palabras con mas de 100 caracteres.
     - Debe entender el estilo markdown. Transcribir lo que sea posible a texto legible, como por ejemplo: "caja de código", para las triple comillas invertidas.
+- **FALTA**: Archivo de configuración:
+    - Modelo (Si no existe pasa a default, esto lo maneja por completo OpenCode).
+    - Memoria de sesiones (1 dia por defecto/obligado).
+- **FALTA**: `AGENTS.md` especial para el asistente general.
