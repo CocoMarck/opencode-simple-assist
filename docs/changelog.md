@@ -7,11 +7,11 @@
     - Debe leer ABC, números, símbolos comunes (@,#,>,<), y de matemáticas .
     - No debe leer palabras con mas de 100 caracteres.
     - Debe entender el estilo markdown. Transcribir lo que sea posible a texto legible, como por ejemplo: "caja de código", para las triple comillas invertidas.
+- **LISTO**: Directorio especial para el Asistente (El sandbox del asistente).
 - **FALTA**: Archivo de configuración:
     - Modelo (Si no existe pasa a default, esto lo maneja por completo OpenCode).
     - Memoria de sesiones (1 dia por defecto/obligado).
     - Timeout de proceso run de opencode (por defecto un minuto).
 - **FALTA**: `AGENTS.md` especial para el asistente general.
-- **FALTA**: Limitar sesión a modo plan. Igual de todas maneras el run, cuando el build pregunta salir a hacer cosas de su dir de trabajo, pasa obtener un no.
-- **FALTA**: Directorio especial para el Asistente (El sandbox del asistente).
+- **FALTA**: Limitar sesión a modo plan. Igual de todas maneras el run, cuando el build pregunta salir a hacer cosas de su dir de trabajo, pasa a obtener un no.
 - **FALTA**: Construcción de prompt con `Speech to Text` usando vosk.

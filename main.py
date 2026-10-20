@@ -1,4 +1,7 @@
 import random
+import os
+from pathlib import Path
+from jinja2 import Template, Environment, FileSystemLoader
 
 # Módulos
 from core.open_code_manager import OpenCodeManager
@@ -6,26 +9,33 @@ from core.espeak_manager import EspeakManager
 from core.simple_voice_assist import SimpleVoiceAssist
 from core.simple_assist import SimpleAssist
 from core.workdir_manager import WorkdirManager
+from core.agent_manager import AgentManager
 from tts import markdown
 
 # Init Assist workdir
-import os
-from pathlib import Path
 data_home = os.environ.get("XDG_DATA_HOME")
-base = None
+home_dir = None
 if data_home:
-    base = Path(data_home).joinpath(".local", "share")
+    home_dir = Path(data_home).joinpath(".local", "share")
 else:
-    base = Path.home().joinpath(".local", "share")
-workdir = base.joinpath("simple_assist")
+    home_dir = Path.home().joinpath(".local", "share")
+workdir = home_dir.joinpath("simple_assist")
+
+base = Path().parent.absolute()
+TEMPLATES_DIR = base.joinpath("templates")
 print(workdir)
+print(TEMPLATES_DIR)
+
+# Templates
+environment = Environment(loader=FileSystemLoader(TEMPLATES_DIR))
 
 
 # Palabra clave, para recibir ordenes.
 keyword = "Asistente"
 
 # Inicializar módulos
-workdir_manager = WorkdirManager(workdir)
+agent_manager = AgentManager(name=keyword, environment=environment)
+workdir_manager = WorkdirManager(workdir, agent_manager)
 workdir_manager.ensure()
 open_code_manager = OpenCodeManager(timeout=60, workdir=workdir)
 espeak_manager = EspeakManager()
@@ -39,9 +49,11 @@ text = random.choice([
     "Dime un dato curioso sobre los mecanismos de la tecnología humana.",
     "Haz un poco de freestyle. Escribe en lenguaje de marcado markdown, sin cajas de código.",
     f"Dime para que sirve un {keyword}.",
-    "Abre el navegador predeterminado porfavor. Ya sea una nueva pestaña si es que ya existe un proceso, o uno proceso si es que no hay.",
+    "Abre el navegador predeterminado porfavor. Ya sea una nueva pestaña si es que ya existe un proceso, o un proceso nuevo si es que no hay.",
     "Escribe unas tres lineas de código python. De lo que sea, y escribe su resultado. (Escribe en el chat, no escribas archivos) (Puedes usar tu sandbox para probar).",
-    "Describe resolución de problema matemático, muy sencillo pero con símbolos matemáticos raros."])
+    "Describe resolución de problema matemático, muy sencillo pero con símbolos matemáticos raros.",
+    "Abre la aplicación calculadora.",
+    "Reproduce algo de música, con la aplicación multimedia que prefieras."])
 
 # Debug normalize text
 markdown_text = (

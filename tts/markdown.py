@@ -5,6 +5,8 @@ Funciones sueltas: Sirve para que un texto markdown, pueda ser leído por cualqu
 Quita caracteres que no aportan a la lectura del TTS.
 
 Se puede usar `Regex`, compilados perezosos (lazy). Ejemplo `re.compile(pattern, re.DOTALL)`
+
+El speak normalmente tiene de default `en`. Y lo que se tiene de default, es lo que puede leer mas símbolos sean matemáticos. Pasar a idioma `en`, cuando se detecten símbolos raros, que si aportan a la lectura.
 '''
 
 CHARACTER_LIMIT = 100
