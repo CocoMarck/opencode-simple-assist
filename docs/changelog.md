@@ -2,7 +2,6 @@
 - **LISTO**: Mandarle una ordenes a opencode, con run.
 - **LISTO** TTS, espeak obtiene output de opencode, y lo lee.
 - **LISTO**: Crear sesión fija al dia.
-- **FALTA**: Construcción de prompt con `Speech to Text` usando vosk.
 - **LISTO**: Palabra clave al principio de frase, para recibir orden. Ejemplo: `Asistente, abre el navegador web.`. Esto servirá para tener una dizque contraseña.
 - **LISTO**: Normalizar texto para el TTS. (Especificación en [tts-normalizer.md](./tts-normalizer.md))
     - Debe leer ABC, números, símbolos comunes (@,#,>,<), y de matemáticas .
@@ -11,4 +10,8 @@
 - **FALTA**: Archivo de configuración:
     - Modelo (Si no existe pasa a default, esto lo maneja por completo OpenCode).
     - Memoria de sesiones (1 dia por defecto/obligado).
+    - Timeout de proceso run de opencode (por defecto un minuto).
 - **FALTA**: `AGENTS.md` especial para el asistente general.
+- **FALTA**: Limitar sesión a modo plan. Igual de todas maneras el run, cuando el build pregunta salir a hacer cosas de su dir de trabajo, pasa obtener un no.
+- **FALTA**: Directorio especial para el Asistente (El sandbox del asistente).
+- **FALTA**: Construcción de prompt con `Speech to Text` usando vosk.

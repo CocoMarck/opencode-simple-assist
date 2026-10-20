@@ -5,13 +5,29 @@ from core.open_code_manager import OpenCodeManager
 from core.espeak_manager import EspeakManager
 from core.simple_voice_assist import SimpleVoiceAssist
 from core.simple_assist import SimpleAssist
+from core.workdir_manager import WorkdirManager
 from tts import markdown
+
+# Init Assist workdir
+import os
+from pathlib import Path
+data_home = os.environ.get("XDG_DATA_HOME")
+base = None
+if data_home:
+    base = Path(data_home).joinpath(".local", "share")
+else:
+    base = Path.home().joinpath(".local", "share")
+workdir = base.joinpath("simple_assist")
+print(workdir)
+
 
 # Palabra clave, para recibir ordenes.
 keyword = "Asistente"
 
 # Inicializar módulos
-open_code_manager = OpenCodeManager(timeout=60)
+workdir_manager = WorkdirManager(workdir)
+workdir_manager.ensure()
+open_code_manager = OpenCodeManager(timeout=60, workdir=workdir)
 espeak_manager = EspeakManager()
 simple_voice_assist = SimpleVoiceAssist(keyword, open_code_manager, espeak_manager)
 simple_assist = SimpleAssist(open_code_manager, espeak_manager)
@@ -21,14 +37,11 @@ text = random.choice([
     "Dime una frase aleatoria por favor.",
     "Dime un dato curioso sobre los seres vivos.",
     "Dime un dato curioso sobre los mecanismos de la tecnología humana.",
-    "Haz un poco de freestyle.",
+    "Haz un poco de freestyle. Escribe en lenguaje de marcado markdown, sin cajas de código.",
     f"Dime para que sirve un {keyword}.",
     "Abre el navegador predeterminado porfavor. Ya sea una nueva pestaña si es que ya existe un proceso, o uno proceso si es que no hay.",
-    "Escribe unas tres lineas de código python. De lo que sea. (Escribe en el chat, no escribas archivos) (Puedes usar tu sandbox para probar)."
+    "Escribe unas tres lineas de código python. De lo que sea, y escribe su resultado. (Escribe en el chat, no escribas archivos) (Puedes usar tu sandbox para probar).",
     "Describe resolución de problema matemático, muy sencillo pero con símbolos matemáticos raros."])
-
-simple_voice_assist.request_by_keyword( f"{keyword}. {text}" )
-#simple_assist.request(text)
 
 # Debug normalize text
 markdown_text = (
@@ -77,3 +90,6 @@ if False:
     else:
         print("Normalized text:", markdown.normalize( markdown_text) )
     
+else:
+    simple_voice_assist.request_by_keyword( f"{keyword}. {text}" )
+    #simple_assist.request(text)
