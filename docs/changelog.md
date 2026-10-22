@@ -8,10 +8,13 @@
     - No debe leer palabras con mas de 100 caracteres.
     - Debe entender el estilo markdown. Transcribir lo que sea posible a texto legible, como por ejemplo: "caja de código", para las triple comillas invertidas.
 - **LISTO**: Directorio especial para el Asistente (El sandbox del asistente).
-- **FALTA**: Archivo de configuración:
+- **LISTO**: `AGENTS.md` especial para el asistente general.
+- **LISTO**: Archivo de configuración:
     - Modelo (Si no existe pasa a default, esto lo maneja por completo OpenCode).
     - Memoria de sesiones (1 dia por defecto/obligado).
     - Timeout de proceso run de opencode (por defecto un minuto).
-- **FALTA**: `AGENTS.md` especial para el asistente general.
 - **FALTA**: Limitar sesión a modo plan. Igual de todas maneras el run, cuando el build pregunta salir a hacer cosas de su dir de trabajo, pasa a obtener un no.
 - **FALTA**: Construcción de prompt con `Speech to Text` usando vosk.
+- **FALTA**: Guardar el `simple_assist.toml`, al directorio de trabajo del asistente, ya que el `AGENTS.md` lo necesita para su contexto.
+- **FALTA**: `core, ConfigManager`, Tiene cargar los parámetros, y validar el tipo de dato de los parámetros en el `archivo.toml`.
+- **LISTO**: `SimpleAssist`, memoria en dias, obtener sesión dia de hoy, si no existe en memoria sesión anterior pedida. Eso si, almacenar con `for` y range, dia por dia las sesiones existentes, y almacenarlas en list, y de esa list, obtener el dia mas viejo. Ejemplo memoria de 20 días. Buscar entre esos días la ultima sesión disponible.

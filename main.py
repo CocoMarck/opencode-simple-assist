@@ -26,34 +26,50 @@ TEMPLATES_DIR = base.joinpath("templates")
 print(workdir)
 print(TEMPLATES_DIR)
 
+SIMPLE_ASSIST_FILE = base.joinpath("config", "simple_assist.toml")
+
 # Templates
 environment = Environment(loader=FileSystemLoader(TEMPLATES_DIR))
 
 
+# Init config
+import tomllib
+with open(SIMPLE_ASSIST_FILE, "rb") as f:
+    data = tomllib.load(f)
+print(data)
+
+
+
 # Palabra clave, para recibir ordenes.
-keyword = "Asistente"
+keyword = data["name"]
+timeout = data["response_timeout_in_seconds"]
 
 # Inicializar módulos
 agent_manager = AgentManager(name=keyword, environment=environment)
 workdir_manager = WorkdirManager(workdir, agent_manager)
 workdir_manager.ensure()
-open_code_manager = OpenCodeManager(timeout=60, workdir=workdir)
+open_code_manager = OpenCodeManager(timeout=timeout, workdir=workdir)
 espeak_manager = EspeakManager()
-simple_voice_assist = SimpleVoiceAssist(keyword, open_code_manager, espeak_manager)
-simple_assist = SimpleAssist(open_code_manager, espeak_manager)
+simple_voice_assist = SimpleVoiceAssist(
+    keyword, open_code_manager, espeak_manager, 
+    data["memory_in_days"], data["model"])
+simple_assist = SimpleAssist(
+    open_code_manager, espeak_manager, data["memory_in_days"], data["model"])
 
 # Construcción de prompt con `Speech to Text`
 text = random.choice([
     "Dime una frase aleatoria por favor.",
     "Dime un dato curioso sobre los seres vivos.",
     "Dime un dato curioso sobre los mecanismos de la tecnología humana.",
-    "Haz un poco de freestyle. Escribe en lenguaje de marcado markdown, sin cajas de código.",
+    "Haz un poco de freestyle. No la hagas adentro de una caja de código.",
     f"Dime para que sirve un {keyword}.",
     "Abre el navegador predeterminado porfavor. Ya sea una nueva pestaña si es que ya existe un proceso, o un proceso nuevo si es que no hay.",
     "Escribe unas tres lineas de código python. De lo que sea, y escribe su resultado. (Escribe en el chat, no escribas archivos) (Puedes usar tu sandbox para probar).",
     "Describe resolución de problema matemático, muy sencillo pero con símbolos matemáticos raros.",
     "Abre la aplicación calculadora.",
-    "Reproduce algo de música, con la aplicación multimedia que prefieras."])
+    "Reproduce algo de música, con la aplicación multimedia que prefieras.",
+    "Hola, porfavor, simplemente escribe un poco de texto.Es por fines debug.",
+])
 
 # Debug normalize text
 markdown_text = (

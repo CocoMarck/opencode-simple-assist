@@ -1,0 +1,4 @@
+name = "Asistente"
+model = "opencode/big-pickle"
+memory_in_days = 4
+response_timeout_in_seconds = 60

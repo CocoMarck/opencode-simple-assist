@@ -15,7 +15,54 @@ class OpenCodeManager:
         self._timeout = timeout
         self._workdir = workdir
     
-    def get_session_list(self) -> [dict]:
+    def get_models(self) -> list[str]:
+        '''
+        Obtiene una lista de strings de los modelos disponibles.
+
+        Se ven algo asi: `compañia/AI-Chido-2.0`
+        '''
+        result = subprocess.run(
+            ["opencode", "models"], capture_output=True, text=True)
+        return list( filter(None, result.stdout.split("\n")) )
+    
+    def get_models_dict(self) -> dict:
+        '''
+        Conceptual, debe jalar. Obtiene una dict asi (`dict{ str: list[str]}`):
+        ```
+        dueño/
+            CodeName-Modelo-AI
+        ```
+
+        Servirá para selección mas seccionada de modelo, por GUI, o CLI.
+
+        De hecho, puede que sea mejor que no viva en `OpenCodeManager`.
+        '''
+        models = self.get_models()
+        models_dict = {}
+        for model in models:
+            sections = model.split("/")
+            
+            # Agregar code name y dueño y subdueños
+            owner_and_sub = ""
+            code_name = ""
+            for index in range(0, len(sections)):
+                if index == max(sections):
+                    code_name = sections[index]
+                else:
+                    owner_and_sub += sections[index] + "/"
+            
+            # Si no existe owner como key, agregarlo como tal. Tiene que ser una lista.
+            if not owner_and_sub in models_dict.keys():
+                models_dict[owner_and_sub] = []
+            
+            # Agregar code name.
+            models_dict[owner_and_sub].append(code_name)
+        return models_dict
+    
+    def exist_model(self, model: str) -> bool:
+        return model in self.get_models()
+    
+    def get_session_list(self) -> list[dict]:
         '''
         Obtiene en formato lista de dicts, usando el directorio de trabajo, las sesiones disponibles.
         '''
@@ -63,19 +110,19 @@ class OpenCodeManager:
         else:
             return identifier
 
-    def run_by_title(self, title:str, prompt:str) -> subprocess:
+    def run_by_title(self, title:str, prompt:str, model:str = "") -> subprocess:
         '''
         Simple. Crea sesiones. Si ya existe la session con ese titulo, igual crea una nueva.
         '''
         return subprocess.run([
-            "opencode", "run", "--dir", self._workdir, "--title", title, prompt], 
+            "opencode", "run", "--dir", self._workdir, "--model", model, "--title", title, prompt], 
             capture_output=True, text=True, timeout=self._timeout)
     
-    def run_by_id(self, session_id:str, prompt: str):
+    def run_by_id(self, session_id:str, prompt: str, model:str=""):
         '''
         Simple. Usa sesiones. Si no existe ese ID, crash.
         '''
         return subprocess.run([
-            "opencode", "run", "--dir", self._workdir, "--session", session_id, prompt], 
+            "opencode", "run", "--dir", self._workdir, "--model", model, "--session", session_id, prompt], 
             capture_output=True, text=True, timeout=self._timeout)
 

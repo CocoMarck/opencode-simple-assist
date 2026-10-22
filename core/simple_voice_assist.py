@@ -12,10 +12,10 @@ class SimpleVoiceAssist(SimpleAssist):
     def _normalized_text_with_keyword(self, text: str):
         return "".join(char for char in text if char.isalpha() or char == " ")
 
-    def _use_keyword(self, text:str):
+    def _use_keyword(self, text:str) -> bool:
         keyword = self._normalized_text_with_keyword(text).lower().split()[0]
         print("Key word:", keyword)
-        return keyword == keyword.lower()
+        return keyword == self.keyword.lower()
 
     def _remove_keyword(self, text:str):
         new_text = ""
