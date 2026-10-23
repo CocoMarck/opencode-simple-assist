@@ -8,5 +8,6 @@ class AgentManager:
     
     def render_agents_md(self) -> list[str]:
         template = self._environment.get_template("simple_assist_agents.md.jinja")
-        info = {"name": self._name}
-        return template.render(info)
+        #info = {"name": self._name}
+        #return template.render(info)
+        return template.render()

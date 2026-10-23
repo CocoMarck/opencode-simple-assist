@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>  
+ <widget class="QMainWindow" name="MainWindow">
+  
+  <!-- Para centrar todo -->
+  <widget class="QWidget" name="central_widget">
+   <layout class="QVBoxLayout" name="vbox_main">
+    <item>
+     <widget class="QLineEdit" name="entry_input">
+      <property name="placeholderText"><string>Input for assist</string></property>
+     </widget>
+    </item>
+
+    <item>
+     <widget class="QPushButton" name="button_send">
+      <property name="text"><string>Send</string></property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <!-- Para centrar todo -->
+
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

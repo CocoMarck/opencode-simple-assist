@@ -1,9 +1,8 @@
-import random
-import os
+import os, sys, random
 from pathlib import Path
 from jinja2 import Template, Environment, FileSystemLoader
 
-# Módulos
+# Módulos Simple Assist
 from core.open_code_manager import OpenCodeManager
 from core.espeak_manager import EspeakManager
 from core.simple_voice_assist import SimpleVoiceAssist
@@ -12,7 +11,11 @@ from core.workdir_manager import WorkdirManager
 from core.agent_manager import AgentManager
 from tts import markdown
 
-# Init Assist workdir
+# Views QT
+from PyQt6.QtWidgets import QApplication
+from views.main_window import MainWindow
+
+# Init Assist Paths
 data_home = os.environ.get("XDG_DATA_HOME")
 home_dir = None
 if data_home:
@@ -28,6 +31,8 @@ print(TEMPLATES_DIR)
 
 SIMPLE_ASSIST_FILE = base.joinpath("config", "simple_assist.toml")
 
+MAIN_WINDOW_UI_FILE = base.joinpath("views", "main_window.ui")
+
 # Templates
 environment = Environment(loader=FileSystemLoader(TEMPLATES_DIR))
 
@@ -39,14 +44,13 @@ with open(SIMPLE_ASSIST_FILE, "rb") as f:
 print(data)
 
 
-
 # Palabra clave, para recibir ordenes.
 keyword = data["name"]
 timeout = data["response_timeout_in_seconds"]
 
 # Inicializar módulos
 agent_manager = AgentManager(name=keyword, environment=environment)
-workdir_manager = WorkdirManager(workdir, agent_manager)
+workdir_manager = WorkdirManager(workdir, agent_manager, SIMPLE_ASSIST_FILE)
 workdir_manager.ensure()
 open_code_manager = OpenCodeManager(timeout=timeout, workdir=workdir)
 espeak_manager = EspeakManager()
@@ -54,7 +58,8 @@ simple_voice_assist = SimpleVoiceAssist(
     keyword, open_code_manager, espeak_manager, 
     data["memory_in_days"], data["model"])
 simple_assist = SimpleAssist(
-    open_code_manager, espeak_manager, data["memory_in_days"], data["model"])
+    open_code_manager=open_code_manager, espeak_manager=espeak_manager, 
+    memory_in_days=data["memory_in_days"], model=data["model"])
 
 # Construcción de prompt con `Speech to Text`
 text = random.choice([
@@ -68,7 +73,7 @@ text = random.choice([
     "Describe resolución de problema matemático, muy sencillo pero con símbolos matemáticos raros.",
     "Abre la aplicación calculadora.",
     "Reproduce algo de música, con la aplicación multimedia que prefieras.",
-    "Hola, porfavor, simplemente escribe un poco de texto.Es por fines debug.",
+    "Hola, porfavor, simplemente escribe un poco de texto. Es por fines debug.",
 ])
 
 # Debug normalize text
@@ -111,7 +116,7 @@ La verdad no se como implementar: "∈, "□", "∎", "≔", "ℝ", "⊹". Así 
 
 Ahora muchas letras para ver si limita cantidad de palabras: {"a e i o u "*500}.
 ''' )
-if False:
+if True:
     print("Raw text:", markdown_text)
     if False:
         espeak_manager.speak(markdown.normalize( markdown_text))
@@ -121,3 +126,12 @@ if False:
 else:
     simple_voice_assist.request_by_keyword( f"{keyword}. {text}" )
     #simple_assist.request(text)
+
+# Views app
+def main():
+    app = QApplication( sys.argv )
+    main_window = MainWindow(MAIN_WINDOW_UI_FILE, simple_assist)
+    main_window.show()
+    sys.exit( app.exec() )
+if __name__ == '__main__':
+    main()

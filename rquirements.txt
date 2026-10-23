@@ -1,2 +1,3 @@
 tomli-w
 tomllib
+PyQt6

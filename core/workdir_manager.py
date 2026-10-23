@@ -7,10 +7,11 @@ from core.agent_manager import AgentManager
 APP_DIR = "simple_assist"
 
 class WorkdirManager:
-    def __init__( self, root: Path, agent_manager: AgentManager):
+    def __init__( self, root: Path, agent_manager: AgentManager, config_file: Path ):
         self._workdir = root
         self._agent_manager = agent_manager
         self._agents_file = self._workdir.joinpath("AGENTS.md")
+        self._config_file = config_file
         
     @property # Esto es para que jale como propiedad. Como si fuera code `C`.
     def workdir(self) -> Path:
@@ -22,6 +23,7 @@ class WorkdirManager:
         '''
         self._workdir.mkdir(parents=True, exist_ok=True)
         self._save_agents_file()
+        self._save_config_file()
         return self._workdir
     
     def _save_agents_file(self):
@@ -31,3 +33,8 @@ class WorkdirManager:
     def _write_agents_file(self):
         with open(self._agents_file, "w") as file:
             file.write( self._agent_manager.render_agents_md() )
+        
+    def _save_config_file(self):
+        if self._config_file.exists():
+            shutil.copyfile(
+                self._config_file, self._workdir.joinpath(self._config_file.name) )
