@@ -2,3 +2,5 @@
 .opencode/
 __pycache__/
 *.pycache
+models/
+*.log

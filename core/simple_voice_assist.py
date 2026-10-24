@@ -1,12 +1,13 @@
-
 # Módulos
 from .simple_assist import SimpleAssist
+from .stt_manager import SttManager
 
 class SimpleVoiceAssist(SimpleAssist):
     def __init__(
-        self, keyword: str, *args, **kwargs):
+        self, keyword: str, stt_manager: SttManager, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.keyword = keyword
+        self._stt_manager = stt_manager
 
     # Palabra clave
     def _normalized_text_with_keyword(self, text: str):
@@ -40,3 +41,12 @@ class SimpleVoiceAssist(SimpleAssist):
         print("Text:", text)
         print("Normalized text:", normalized_text)
         self.request(normalized_text)
+
+    # Using `vosk` and `sounddevice`
+    def request_by_microphone(self):
+        '''
+        Petición por audio.
+        '''
+        text = self._stt_manager.speech_to_text()
+        print("STT:", text)
+        self.request(text)

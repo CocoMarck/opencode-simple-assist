@@ -1,0 +1,14 @@
+# Dependencias genéricas
+jinja2
+
+# Para data
+#tomllib # Viene con python
+tomli-w
+
+# Para GUI
+PyQt6
+
+# Para trabajar con el micrófono
+sounddevice
+vosk
+numpy

@@ -9,11 +9,15 @@ from core.simple_voice_assist import SimpleVoiceAssist
 from core.simple_assist import SimpleAssist
 from core.workdir_manager import WorkdirManager
 from core.agent_manager import AgentManager
+from core.stt_manager import SttManager
 from tts import markdown
 
 # Views QT
 from PyQt6.QtWidgets import QApplication
 from views.main_window import MainWindow
+
+# Vosk
+from vosk import Model, KaldiRecognizer
 
 # Init Assist Paths
 data_home = os.environ.get("XDG_DATA_HOME")
@@ -33,6 +37,8 @@ SIMPLE_ASSIST_FILE = base.joinpath("config", "simple_assist.toml")
 
 MAIN_WINDOW_UI_FILE = base.joinpath("views", "main_window.ui")
 
+MODEL_DIR = base.joinpath("models", "vosk-model-small-es-0.42")
+
 # Templates
 environment = Environment(loader=FileSystemLoader(TEMPLATES_DIR))
 
@@ -48,33 +54,26 @@ print(data)
 keyword = data["name"]
 timeout = data["response_timeout_in_seconds"]
 
-# Inicializar módulos
+# Inicializar vosk
+SAMPLE_RATE = 16000
+model = Model("./models/vosk-model-small-es-0.42")
+stt_manager = SttManager(model=model, sample_rate=SAMPLE_RATE, duration_in_seconds=6)
+
+# Inicializar simple assist dirs
 agent_manager = AgentManager(name=keyword, environment=environment)
 workdir_manager = WorkdirManager(workdir, agent_manager, SIMPLE_ASSIST_FILE)
 workdir_manager.ensure()
+
+# Inicializer simple assist
 open_code_manager = OpenCodeManager(timeout=timeout, workdir=workdir)
 espeak_manager = EspeakManager()
 simple_voice_assist = SimpleVoiceAssist(
-    keyword, open_code_manager, espeak_manager, 
-    data["memory_in_days"], data["model"])
+    keyword=keyword, stt_manager=stt_manager, 
+    open_code_manager=open_code_manager, espeak_manager=espeak_manager,
+    memory_in_days=data["memory_in_days"], model=data["model"] )
 simple_assist = SimpleAssist(
     open_code_manager=open_code_manager, espeak_manager=espeak_manager, 
     memory_in_days=data["memory_in_days"], model=data["model"])
-
-# Construcción de prompt con `Speech to Text`
-text = random.choice([
-    "Dime una frase aleatoria por favor.",
-    "Dime un dato curioso sobre los seres vivos.",
-    "Dime un dato curioso sobre los mecanismos de la tecnología humana.",
-    "Haz un poco de freestyle. No la hagas adentro de una caja de código.",
-    f"Dime para que sirve un {keyword}.",
-    "Abre el navegador predeterminado porfavor. Ya sea una nueva pestaña si es que ya existe un proceso, o un proceso nuevo si es que no hay.",
-    "Escribe unas tres lineas de código python. De lo que sea, y escribe su resultado. (Escribe en el chat, no escribas archivos) (Puedes usar tu sandbox para probar).",
-    "Describe resolución de problema matemático, muy sencillo pero con símbolos matemáticos raros.",
-    "Abre la aplicación calculadora.",
-    "Reproduce algo de música, con la aplicación multimedia que prefieras.",
-    "Hola, porfavor, simplemente escribe un poco de texto. Es por fines debug.",
-])
 
 # Debug normalize text
 markdown_text = (
@@ -116,16 +115,33 @@ La verdad no se como implementar: "∈, "□", "∎", "≔", "ℝ", "⊹". Así 
 
 Ahora muchas letras para ver si limita cantidad de palabras: {"a e i o u "*500}.
 ''' )
-if True:
+test_normalizer = False
+test_simple_assist = False
+test_simple_voice_assist = False
+if test_normalizer:
     print("Raw text:", markdown_text)
     if False:
         espeak_manager.speak(markdown.normalize( markdown_text))
     else:
         print("Normalized text:", markdown.normalize( markdown_text) )
+if test_simple_assist:
+    text = random.choice([
+        "Dime una frase aleatoria por favor.",
+        "Dime un dato curioso sobre los seres vivos.",
+        "Dime un dato curioso sobre los mecanismos de la tecnología humana.",
+        "Haz un poco de freestyle. No la hagas adentro de una caja de código.",
+        f"Dime para que sirve un {keyword}.",
+        "Abre el navegador predeterminado porfavor. Ya sea una nueva pestaña si es que ya existe un proceso, o un proceso nuevo si es que no hay.",
+        "Escribe unas tres lineas de código python. De lo que sea, y escribe su resultado. (Escribe en el chat, no escribas archivos) (Puedes usar tu sandbox para probar).",
+        "Describe resolución de problema matemático, muy sencillo pero con símbolos matemáticos raros.",
+        "Abre la aplicación calculadora.",
+        "Reproduce algo de música, con la aplicación multimedia que prefieras.",
+        "Hola, porfavor, simplemente escribe un poco de texto. Es por fines debug.",
+    ])
     
-else:
-    simple_voice_assist.request_by_keyword( f"{keyword}. {text}" )
-    #simple_assist.request(text)
+    simple_assist.request(text)
+if test_simple_voice_assist:
+    simple_voice_assist.request_by_microphone()
 
 # Views app
 def main():

@@ -15,7 +15,8 @@
     - Timeout de proceso run de opencode (por defecto un minuto).
 - **LISTO**: `SimpleAssist`, memoria en días, obtener la ultima sesión disponible del transcurso de `x` cantidad de días. Ejemplo, de 20 días de posibles sesiones, seleccionar la ultima sesión existente.
 - **LISTO**: Guardar el `simple_assist.toml`, al directorio de trabajo del asistente, ya que el `AGENTS.md` lo necesita para su contexto.
+- **LISTO**: Qt input simple, para escribirle al asistente.
+- **LISTO**: Construcción de prompt con `Speech to Text` usando vosk.
 - **FALTA**: Limitar sesión a modo plan. Igual de todas maneras el run, cuando el build pregunta salir a hacer cosas de su dir de trabajo, pasa a obtener un no.
-- **FALTA**: Construcción de prompt con `Speech to Text` usando vosk.
 - **FALTA**: `core, ConfigManager`, Tiene cargar los parámetros, y validar el tipo de dato de los parámetros en el `archivo.toml`.
-- **FALTA**: Qt input dialog simple, para hablar con el asistente.
+- **FALTA**: Loop de escuha de palabra clave, usando vosk.
