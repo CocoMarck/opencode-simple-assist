@@ -17,7 +17,7 @@ class SimpleVoiceAssist(SimpleAssist):
 
     # Palabra clave
     def normalized_keyword(self):
-        return keyword.lower().strip()
+        return self.keyword.lower().strip()
 
     def _normalized_text_with_keyword(self, text: str):
         return "".join(char for char in text if char.isalpha() or char == " ")
