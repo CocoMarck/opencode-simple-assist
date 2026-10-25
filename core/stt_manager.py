@@ -2,42 +2,63 @@ import json
 
 # Audio
 from vosk import Model, KaldiRecognizer
-import sounddevice
+
+# Modulos
+from core.microphone_recorder import MicrophoneRecorder
 
 class SttManager:
-    def __init__( 
-        self, model: Model, sample_rate: int, duration_in_seconds: int):
+    def __init__( self, model: Model, microphone_recorder: MicrophoneRecorder ):
 
         self.model = model
-        self._sample_rate = sample_rate
-        self._duration_in_seconds = duration_in_seconds
+        self._microphone_recorder = microphone_recorder
     
-    def set_duration(self, duration: int):
-        if not isinstance(duration, int):
-            raise Exception("The duration need a int value.")
-        self._duration_in_seconds = duration
-    
-    def get_recognizer(self) -> KaldiRecognizer:
-        recognizer = KaldiRecognizer(self.model, self._sample_rate)
+    def get_recognizer(self, grammar: list[str] | None = None) -> KaldiRecognizer:
+        if grammar == None:
+            recognizer = KaldiRecognizer(self.model, self._microphone_recorder.sample_rate)
+        else:
+            recognizer = KaldiRecognizer(self.model, self._microphone_recorder.sample_rate, grammar)
         recognizer.SetWords(False)
         return recognizer
-    
-    def _get_duration(self):
-        return int(self._duration_in_seconds * self._sample_rate)
 
-    def speech_to_text(self) -> str:
+    def speech_to_text(self, duration_in_seconds: float) -> str:
         print("Habla ahora...")
-        audio = sounddevice.rec(
-            self._get_duration(),
-            samplerate=self._sample_rate,
-            channels=1,
-            dtype="int16",
-            device=None
-        )
-        sounddevice.wait()
+        audio_bytes = self._microphone_recorder.sync_with_duration(duration_in_seconds)
         recognizer = self.get_recognizer()
-        if recognizer.AcceptWaveform(audio.tobytes()):
-            pass
-
+        recognizer.AcceptWaveform(audio_bytes)
         result = json.loads(recognizer.FinalResult())
-        return result.get("text", "").strip()
+        return result.get("text", "")
+    
+    def wait_for_keyword(self, keyword:str) -> bool:
+        '''
+        - No se normaliza keyword. Así que asegúrate de mandar algo adecuado.
+        '''
+        recognizer = self.get_recognizer(grammar=[keyword, "[unk]"])
+        self._microphone_recorder.start_with_callback(self._keyword_callback)
+        try:
+            while False:
+                pass
+        finally:
+            self._microphone_recorder.stop()
+            del recognizer
+    
+    def _keyword_callback(self, data: bytes):
+        pass
+
+    # Para grabación sin limite.
+    def _callback(self, indata, grames, time_info, status):
+        if status:
+            print(status)
+        self._buffer.extend(indata.tobytes())
+
+    def start_recording(self):
+        self._microphone_recorder.start()
+    
+    def stop_recording(self) -> str:
+        buffer = self._microphone_recorder.stop()
+
+        recognizer = self.get_recognizer()
+        recognizer.AcceptWaveform(bytes(buffer))
+        result = json.loads(recognizer.FinalResult())
+        return result.get("text", "")
+
+    

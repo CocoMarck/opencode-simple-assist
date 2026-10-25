@@ -7,7 +7,7 @@
   <widget class="QWidget" name="central_widget">
    <layout class="QVBoxLayout" name="vbox_main">
     <item>
-     <widget class="QLineEdit" name="entry_input">
+     <widget class="QTextEdit" name="textedit_input">
       <property name="placeholderText"><string>Input for assist</string></property>
      </widget>
     </item>
@@ -15,6 +15,11 @@
     <item>
      <widget class="QPushButton" name="button_send">
       <property name="text"><string>Send</string></property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="button_speech">
+      <property name="text"><string>Speech</string></property>
      </widget>
     </item>
    </layout>

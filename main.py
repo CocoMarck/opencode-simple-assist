@@ -2,22 +2,31 @@ import os, sys, random
 from pathlib import Path
 from jinja2 import Template, Environment, FileSystemLoader
 
-# Módulos Simple Assist
-from core.open_code_manager import OpenCodeManager
-from core.espeak_manager import EspeakManager
-from core.simple_voice_assist import SimpleVoiceAssist
-from core.simple_assist import SimpleAssist
-from core.workdir_manager import WorkdirManager
-from core.agent_manager import AgentManager
-from core.stt_manager import SttManager
-from tts import markdown
-
 # Views QT
 from PyQt6.QtWidgets import QApplication
 from views.main_window import MainWindow
 
 # Vosk
-from vosk import Model, KaldiRecognizer
+from vosk import Model
+
+# Audio things
+from core.microphone_recorder import MicrophoneRecorder
+
+# STT
+from core.stt_manager import SttManager
+
+# TTS
+from core.espeak_manager import EspeakManager
+
+# Simple Assist
+from core.open_code_manager import OpenCodeManager
+from core.simple_voice_assist import SimpleVoiceAssist
+from core.simple_assist import SimpleAssist
+from core.workdir_manager import WorkdirManager
+from core.agent_manager import AgentManager
+from tts import markdown
+
+# ------------------------------------------------------------------------------
 
 # Init Assist Paths
 data_home = os.environ.get("XDG_DATA_HOME")
@@ -39,8 +48,11 @@ MAIN_WINDOW_UI_FILE = base.joinpath("views", "main_window.ui")
 
 MODEL_DIR = base.joinpath("models", "vosk-model-small-es-0.42")
 
-# Templates
+# Init Templates
 environment = Environment(loader=FileSystemLoader(TEMPLATES_DIR))
+
+# Constantes
+SAMPLE_RATE = 16000
 
 
 # Init config
@@ -54,10 +66,12 @@ print(data)
 keyword = data["name"]
 timeout = data["response_timeout_in_seconds"]
 
-# Inicializar vosk
-SAMPLE_RATE = 16000
+# Inicializar audio things
+microphone_recorder = MicrophoneRecorder(SAMPLE_RATE)
+
+# Inicializar stt
 model = Model("./models/vosk-model-small-es-0.42")
-stt_manager = SttManager(model=model, sample_rate=SAMPLE_RATE, duration_in_seconds=6)
+stt_manager = SttManager(model=model, microphone_recorder=microphone_recorder)
 
 # Inicializar simple assist dirs
 agent_manager = AgentManager(name=keyword, environment=environment)
@@ -68,12 +82,14 @@ workdir_manager.ensure()
 open_code_manager = OpenCodeManager(timeout=timeout, workdir=workdir)
 espeak_manager = EspeakManager()
 simple_voice_assist = SimpleVoiceAssist(
-    keyword=keyword, stt_manager=stt_manager, 
+    keyword=keyword, stt_manager=stt_manager, duration_in_seconds=7.0,
     open_code_manager=open_code_manager, espeak_manager=espeak_manager,
     memory_in_days=data["memory_in_days"], model=data["model"] )
 simple_assist = SimpleAssist(
     open_code_manager=open_code_manager, espeak_manager=espeak_manager, 
     memory_in_days=data["memory_in_days"], model=data["model"])
+
+# ------------------------------------------------------------------------------
 
 # Debug normalize text
 markdown_text = (
@@ -143,10 +159,12 @@ if test_simple_assist:
 if test_simple_voice_assist:
     simple_voice_assist.request_by_microphone()
 
+# ------------------------------------------------------------------------------
+
 # Views app
 def main():
     app = QApplication( sys.argv )
-    main_window = MainWindow(MAIN_WINDOW_UI_FILE, simple_assist)
+    main_window = MainWindow(MAIN_WINDOW_UI_FILE, simple_assist, stt_manager)
     main_window.show()
     sys.exit( app.exec() )
 if __name__ == '__main__':

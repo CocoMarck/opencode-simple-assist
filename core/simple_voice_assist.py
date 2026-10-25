@@ -1,29 +1,38 @@
+import threading
+
 # Módulos
 from .simple_assist import SimpleAssist
 from .stt_manager import SttManager
 
 class SimpleVoiceAssist(SimpleAssist):
+    '''
+    Tiene para escuchar palabra clave. Se usa en un bucle.
+    '''
     def __init__(
-        self, keyword: str, stt_manager: SttManager, *args, **kwargs):
+        self, keyword: str, stt_manager: SttManager, duration_in_seconds: float, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.keyword = keyword
         self._stt_manager = stt_manager
+        self._duration_in_seconds = duration_in_seconds
 
     # Palabra clave
+    def normalized_keyword(self):
+        return keyword.lower().strip()
+
     def _normalized_text_with_keyword(self, text: str):
         return "".join(char for char in text if char.isalpha() or char == " ")
 
     def _use_keyword(self, text:str) -> bool:
         keyword = self._normalized_text_with_keyword(text).lower().split()[0]
         print("Key word:", keyword)
-        return keyword == self.keyword.lower()
+        return keyword == self.normalized_keyword()
 
     def _remove_keyword(self, text:str):
         new_text = ""
         get_first_coincidence = False
         for word in text.split():
             if (
-                self._normalized_text_with_keyword(word).lower() == self.keyword.lower() 
+                self._normalized_text_with_keyword(word).lower() == self.normalized_keyword() 
                 and not get_first_coincidence):
                 get_first_coincidence = True
             else:
@@ -47,6 +56,6 @@ class SimpleVoiceAssist(SimpleAssist):
         '''
         Petición por audio.
         '''
-        text = self._stt_manager.speech_to_text()
+        text = self._stt_manager.speech_to_text(self._duration_in_seconds).strip()
         print("STT:", text)
         self.request(text)
