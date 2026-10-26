@@ -13,7 +13,9 @@ from vosk import Model
 from core.microphone_recorder import MicrophoneRecorder
 
 # STT
-from core.stt_manager import SttManager
+from core.vosk_manager import VoskManager
+from core.speech_to_text import SpeechToText
+from core.voice_listener import VoiceListener
 
 # TTS
 from core.espeak_manager import EspeakManager
@@ -24,6 +26,7 @@ from core.simple_voice_assist import SimpleVoiceAssist
 from core.simple_assist import SimpleAssist
 from core.workdir_manager import WorkdirManager
 from core.agent_manager import AgentManager
+from core.speech_to_text import SpeechToText
 from tts import markdown
 
 # ------------------------------------------------------------------------------
@@ -71,7 +74,15 @@ microphone_recorder = MicrophoneRecorder(SAMPLE_RATE)
 
 # Inicializar stt
 model = Model("./models/vosk-model-small-es-0.42")
-stt_manager = SttManager(model=model, microphone_recorder=microphone_recorder)
+vosk_manager = VoskManager(model, SAMPLE_RATE)
+def on_keyword():
+    print(f"Palabra {keyword} detectada")
+voice_listener = VoiceListener(
+    vosk_manager=vosk_manager, microphone_recorder=microphone_recorder,
+    keyword=keyword.lower().strip(), on_keyword=on_keyword)
+
+stt = SpeechToText(
+    vosk_manager=vosk_manager, microphone_recorder=microphone_recorder)
 
 # Inicializar simple assist dirs
 agent_manager = AgentManager(name=keyword, environment=environment)
@@ -82,7 +93,7 @@ workdir_manager.ensure()
 open_code_manager = OpenCodeManager(timeout=timeout, workdir=workdir)
 espeak_manager = EspeakManager()
 simple_voice_assist = SimpleVoiceAssist(
-    keyword=keyword, stt_manager=stt_manager, duration_in_seconds=7.0,
+    keyword=keyword, stt=stt, duration_in_seconds=7.0,
     open_code_manager=open_code_manager, espeak_manager=espeak_manager,
     memory_in_days=data["memory_in_days"], model=data["model"] )
 simple_assist = SimpleAssist(
@@ -164,8 +175,9 @@ if test_simple_voice_assist:
 # Views app
 def main():
     app = QApplication( sys.argv )
-    main_window = MainWindow(MAIN_WINDOW_UI_FILE, simple_assist, stt_manager)
+    main_window = MainWindow(MAIN_WINDOW_UI_FILE, simple_assist, stt)
     main_window.show()
     sys.exit( app.exec() )
 if __name__ == '__main__':
     main()
+    #voice_listener.start()

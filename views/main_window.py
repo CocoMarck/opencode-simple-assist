@@ -4,28 +4,29 @@ from PyQt6.QtCore import QThread, pyqtSignal
 
 # SimpleAssist
 from core.simple_assist import SimpleAssist
-from core.stt_manager import SttManager
+from core.speech_to_text import SpeechToText
 
 # STT
 class SttWorker(QThread):
     finished = pyqtSignal(str)
-    def __init__(self, stt_manager: SttManager, parent=None):
+    def __init__(self, stt: SpeechToText, parent=None):
         super().__init__(parent)
-        self._stt_manager = stt_manager
+        self._stt = stt
     
     def run(self):
-        text = self._stt_manager.stop_recording()
+        text = self._stt.stop_recording()
         self.finished.emit(text)
 
 # MainWindow
 class MainWindow( QtWidgets.QMainWindow ):
-    def __init__(self, ui_file: Path, simple_assist: SimpleAssist, stt_manager: SttManager):
+    def __init__(
+        self, ui_file: Path, simple_assist: SimpleAssist, stt: SpeechToText):
         super().__init__()
 
         uic.loadUi(ui_file, self)
         
         self._simple_assist = simple_assist
-        self._stt_manager = stt_manager
+        self._stt = stt
         self._worker = None
 
         # Widgets: `button_send, textedit_input, button_speech`
@@ -43,19 +44,19 @@ class MainWindow( QtWidgets.QMainWindow ):
     def _speech_toggle(self, checked: bool):
         if checked:
             self.button_send.setEnabled(False)
-            self._stt_manager.start_recording()
+            self._stt.start_recording()
             return
         
         self.button_send.setEnabled(True)
 
-        self._worker = SttWorker(self._stt_manager, self)
+        self._worker = SttWorker(self._stt, self)
         self._worker.finished.connect(self._on_speech_done)
         self._worker.finished.connect(self._on_worker_finished)
         self._worker.start()
     
     def _on_speech_done(self, text: str):
         if not text:
-            self.statusBar().showMensagge("No se detecto vóz, 2000")
+            self.statusBar().showMessage("No se detecto vóz, 2000")
             return
 
         input_text = self.textedit_input.toPlainText().strip()

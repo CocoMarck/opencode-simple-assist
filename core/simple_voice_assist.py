@@ -2,17 +2,17 @@ import threading
 
 # Módulos
 from .simple_assist import SimpleAssist
-from .stt_manager import SttManager
+from .speech_to_text import SpeechToText
 
 class SimpleVoiceAssist(SimpleAssist):
     '''
     Tiene para escuchar palabra clave. Se usa en un bucle.
     '''
     def __init__(
-        self, keyword: str, stt_manager: SttManager, duration_in_seconds: float, *args, **kwargs):
+        self, keyword: str, stt: SpeechToText, duration_in_seconds: float, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.keyword = keyword
-        self._stt_manager = stt_manager
+        self._stt = stt
         self._duration_in_seconds = duration_in_seconds
 
     # Palabra clave
@@ -56,6 +56,6 @@ class SimpleVoiceAssist(SimpleAssist):
         '''
         Petición por audio.
         '''
-        text = self._stt_manager.speech_to_text(self._duration_in_seconds).strip()
+        text = self._stt.speech_to_text(self._duration_in_seconds).strip()
         print("STT:", text)
         self.request(text)
