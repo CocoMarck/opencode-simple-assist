@@ -1,9 +1,20 @@
-import json, threading, time
+'''
+Claude code
+'''
+import json
+import queue
+import threading
+import time
+from enum import Enum, auto
 from typing import Callable
 
 # Modulos
 from core.vosk_manager import VoskManager
 from core.microphone_recorder import MicrophoneRecorder
+
+class _State(Enum):
+    WAITING_KEYWORD = auto()
+    CAPTURING_COMMAND = auto()
 
 class VoiceListener:
     '''
@@ -11,77 +22,92 @@ class VoiceListener:
     - Solo sirve para detectar una palabra clave.
     - Se espera que el keyword este en lower y strip.
     - Se espera un método como parámetro.
+    - NO hacer `stop()` dentro del `on_command`. Haría un join dentro de si mismo (por el hilo worker).
+    - El command recibe puede recibir una palabra mocha, pero recibe algo, es porque se detecto la keyword.
     '''
-    def __init__( self, vosk_manager: VoskManager, 
-        microphone_recorder: MicrophoneRecorder, keyword: str, 
-        on_keyword: Callable[[], None] ):
-        
-        self._microphone_recorder = microphone_recorder
-        self._vosk_manager = vosk_manager
-        self._keyword = keyword
-        self._on_keyword = on_keyword
+    def __init__(
+        self, microphone_recorder: MicrophoneRecorder, 
+        vosk_manager: VoskManager, keyword: str, on_command: Callable[[str], None], command_timeout: float = 8.0):
 
+        self.microphone_recorder = microphone_recorder
+        self.vosk_manager = vosk_manager
+        self.keyword = keyword.strip().lower()
+        self.on_command = on_command
+        self.command_timeout = command_timeout
+
+        self._queue: queue.Queue[bytes] = queue.Queue(maxsize=200)
         self._stop_event = threading.Event()
         self._thread: threading.Thread | None = None
-        self._last_recognizer = None
-
-    @property
-    def grammar(self) -> list[str]:
-        return [self._keyword, "[unk]"]
     
+    # --- Hilo de audio: solo encola ---
+    def _on_audio(self, indata, frames, time_info, status):
+        try:
+            self._queue.put_nowait(indata.tobytes())
+        except queue.Full:
+            pass # Mejor perder un bloque a bloquear el hilo de audio
+    
+    # --- Hilo worker ---
+    def _run(self):
+        state = _State.WAITING_KEYWORD
+        keyword_rec = self.vosk_manager.get_recognizer([self.keyword, "[unk]"])
+        command_rec = None
+        deadline = 0.0
+
+        while not self._stop_event.is_set():
+            # Timeout del comando
+            if state is _State.CAPTURING_COMMAND and time.monotonic() > deadline:
+                text = json.loads(command_rec.FinalResult()).get("text", "").strip()
+                if text:
+                    self._dispatch(text)
+                state = self._back_to_waiting(keyword_rec)
+                continue
+            
+            try:
+                data = self._queue.get(timeout=0.2)
+            except queue.Empty:
+                continue
+        
+            if state is _State.WAITING_KEYWORD:
+                if keyword_rec.AcceptWaveform(data):
+                    text = json.loads(keyword_rec.Result()).get("text", "")
+                else:
+                    text = json.loads(keyword_rec.PartialResult()).get("partial", "")
+            
+                if self.keyword in text:
+                    command_rec = self.vosk_manager.get_recognizer()
+                    deadline = time.monotonic() + self.command_timeout
+                    state = _State.CAPTURING_COMMAND
+        
+            else: # CAPTURING_COMMAND
+                if command_rec.AcceptWaveform(data):
+                    text = json.loads(command_rec.Result()).get("text", "").strip()
+                    if text:
+                        self._dispatch(text)
+                        state = self._back_to_waiting(keyword_rec)
+
+    def _back_to_waiting(self, keyword_rec) -> _State:
+        keyword_rec.Reset()
+        with self._queue.mutex:
+            self._queue.queue.clear()
+        return _State.WAITING_KEYWORD
+    
+    def _dispatch(self, text: str):
+        try:
+            self.on_command(text)
+        except Exception as e:
+            print(f"Error in on_command: {e}")
+    
+    # --- API pública ---
     def start(self):
         if self._thread and self._thread.is_alive():
             return
         self._stop_event.clear()
-        self._thread = threading.Thread(
-            target=self._loop, daemon=False, name="voice-listener")
+        self._thread = threading.Thread(target=self._run, daemon=True)
         self._thread.start()
+        self.microphone_recorder.start_with_callback(self._on_audio)
     
     def stop(self):
         self._stop_event.set()
-        try:
-            self._microphone_recorder.stop()
-        except Exception:
-            pass
+        self.microphone_recorder.stop()
         if self._thread:
-            self._thread.join(timeout=5)
-            self._thread = None
-    
-    def _loop(self):
-        while not self._stop_event.is_set():
-            if not self._wait_for_keyword():
-                continue
-            if self._stop_event.is_set():
-                break
-            self._on_keyword()
-    
-    def _callback(self, indata, frames, time, status):
-        if status:
-            print(status)
-        recognizer = self._last_recognizer
-        if recognizer is None:
-            return
-        recognizer.AcceptWaveform(indata.tobytes())
-    
-    def _wait_for_keyword(self) -> bool:
-        recognizer = self._vosk_manager.get_recognizer(grammar=self.grammar)
-        #if self._last_recognizer is None:
-        self._last_recognizer = recognizer
-        try:
-            self._microphone_recorder.start_with_callback( self._callback )
-            while not self._stop_event.is_set():
-                try:
-                    partial = json.loads(recognizer.PartialResult())
-                    text = partial.get("partial", "").strip().lower()
-                    if text == self._keyword:
-                        print(f"Keyword detected: {self._keyword}")
-                        self._microphone_recorder.stop()
-                        return True
-                except Exception:
-                    pass
-
-                time.sleep(0.01)
-            return False
-        finally:
-            self._microphone_recorder.stop()
-            del recognizer
+            self._thread.join(timeout=2)

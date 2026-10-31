@@ -1,4 +1,4 @@
-import os, sys, random
+import os, sys, random, time
 from pathlib import Path
 from jinja2 import Template, Environment, FileSystemLoader
 
@@ -73,14 +73,16 @@ timeout = data["response_timeout_in_seconds"]
 microphone_recorder = MicrophoneRecorder(SAMPLE_RATE)
 
 # Inicializar stt
+wait_keyword = True
 model = Model("./models/vosk-model-small-es-0.42")
 vosk_manager = VoskManager(model, SAMPLE_RATE)
-def on_keyword():
-    print(f"Palabra {keyword} detectada")
+def on_keyword(text: str):
+    print(f"Palabra `{text}` detectada. Intención: `{keyword}`")
+    global wait_keyword
+    wait_keyword = False
 voice_listener = VoiceListener(
     vosk_manager=vosk_manager, microphone_recorder=microphone_recorder,
-    keyword=keyword.lower().strip(), on_keyword=on_keyword)
-
+    keyword=keyword.lower().strip(), on_command=on_keyword)
 stt = SpeechToText(
     vosk_manager=vosk_manager, microphone_recorder=microphone_recorder)
 
@@ -178,6 +180,16 @@ def main():
     main_window = MainWindow(MAIN_WINDOW_UI_FILE, simple_assist, stt)
     main_window.show()
     sys.exit( app.exec() )
+test_listener = False
 if __name__ == '__main__':
-    main()
-    #voice_listener.start()
+    if test_listener:
+        print("\n\nSTARTING TEST OF VOICE LISTENER...")
+        voice_listener.start()
+        try:
+            while wait_keyword:
+                time.sleep(1)
+                print("Esperando keyword...")
+        except KeyboardInterrupt:
+            voice_listener.stop()
+    else:
+        main()

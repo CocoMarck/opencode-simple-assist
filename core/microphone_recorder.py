@@ -1,9 +1,10 @@
 import sounddevice
 
 class MicrophoneRecorder:
-    def __init__( self, sample_rate: int, blocksize: int = 8000):
+    def __init__( self, sample_rate: int, blocksize: int = 8000, keep_buffer: bool = True):
         self.sample_rate = sample_rate
         self.blocksize = blocksize
+        self.keep_buffer = keep_buffer
         self._stream = None
         self._buffer = bytearray()
 
@@ -19,8 +20,8 @@ class MicrophoneRecorder:
     def _callback(self, indata, frames, time, status):
         if status:
             print(status)
-        data = indata.tobytes()
-        self._buffer.extend(data)
+        if self.keep_buffer:
+            self._buffer.extend(indata.tobytes())
         if self._external_callback is not None:
             try:
                 self._external_callback(indata, frames, time, status)
