@@ -95,7 +95,7 @@ workdir_manager.ensure()
 open_code_manager = OpenCodeManager(timeout=timeout, workdir=workdir)
 espeak_manager = EspeakManager()
 simple_voice_assist = SimpleVoiceAssist(
-    keyword=keyword, stt=stt, duration_in_seconds=7.0,
+    stt=stt, seconds=7.0, voice_listener=voice_listener,
     open_code_manager=open_code_manager, espeak_manager=espeak_manager,
     memory_in_days=data["memory_in_days"], model=data["model"] )
 simple_assist = SimpleAssist(
@@ -146,7 +146,6 @@ Ahora muchas letras para ver si limita cantidad de palabras: {"a e i o u "*500}.
 ''' )
 test_normalizer = False
 test_simple_assist = False
-test_simple_voice_assist = False
 if test_normalizer:
     print("Raw text:", markdown_text)
     if False:
@@ -169,8 +168,6 @@ if test_simple_assist:
     ])
     
     simple_assist.request(text)
-if test_simple_voice_assist:
-    simple_voice_assist.request_by_microphone()
 
 # ------------------------------------------------------------------------------
 
@@ -180,16 +177,10 @@ def main():
     main_window = MainWindow(MAIN_WINDOW_UI_FILE, simple_assist, stt)
     main_window.show()
     sys.exit( app.exec() )
-test_listener = False
+test_listener = True
 if __name__ == '__main__':
     if test_listener:
         print("\n\nSTARTING TEST OF VOICE LISTENER...")
-        voice_listener.start()
-        try:
-            while wait_keyword:
-                time.sleep(1)
-                print("Esperando keyword...")
-        except KeyboardInterrupt:
-            voice_listener.stop()
+        simple_voice_assist.loop()
     else:
         main()

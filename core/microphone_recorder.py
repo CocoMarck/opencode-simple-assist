@@ -14,8 +14,8 @@ class MicrophoneRecorder:
     def buffer(self):
         return self._buffer
 
-    def get_duration_in_seconds(self, duration_in_seconds: float):
-        return int(duration_in_seconds * self.sample_rate)
+    def get_duration_in_seconds(self, seconds: float):
+        return int(seconds * self.sample_rate)
 
     def _callback(self, indata, frames, time, status):
         if status:
@@ -53,12 +53,12 @@ class MicrophoneRecorder:
             print("Stopping recording with no limits in sounddevice...")
         return self._buffer
 
-    def sync_with_duration(self, duration_in_seconds: float) -> bytes:
+    def sync_with_seconds(self, seconds: float) -> bytes:
         '''
         Grabación sincronizada con duración especificada.
         '''
         audio = sounddevice.rec(
-            self.get_duration_in_seconds(duration_in_seconds),
+            self.get_duration_in_seconds(seconds),
             samplerate=self.sample_rate,
             channels=1,
             dtype="int16",

@@ -20,8 +20,15 @@ class SpeechToText:
         buffer = self._microphone_recorder.stop()
 
         recognizer = self._vosk_manager.get_recognizer()
-        print("recognizer paso")
+        print("Recognizer pass")
         recognizer.AcceptWaveform(bytes(buffer))
+        result = json.loads(recognizer.FinalResult())
+        return result.get("text", "")
+    
+    def sync_recording_with_seconds(self, seconds: float) -> float:
+        audio_bytes = self._microphone_recorder.sync_with_seconds(seconds)
+        recognizer = self._vosk_manager.get_recognizer()
+        recognizer.AcceptWaveform(audio_bytes)
         result = json.loads(recognizer.FinalResult())
         return result.get("text", "")
 
