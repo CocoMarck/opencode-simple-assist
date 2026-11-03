@@ -21,29 +21,22 @@ class SimpleVoiceAssist(SimpleAssist):
 
         # Flags
         self._wait_keyword = True
-    
-    @property
-    def keyword(self) -> str:
-        self.voice_listener.keyword
 
     # Palabra clave | Posiblemente todo esto no se use.
-    def normalized_keyword(self):
-        return self.keyword.lower().strip()
-
     def _normalized_text_with_keyword(self, text: str):
         return "".join(char for char in text if char.isalpha() or char == " ")
 
     def _use_keyword(self, text:str) -> bool:
         keyword = self._normalized_text_with_keyword(text).lower().split()[0]
-        print("Key word:", keyword)
-        return keyword == self.normalized_keyword()
+        print("Keyword:", keyword)
+        return keyword == self.voice_listener.normalized_keyword
 
     def _remove_keyword(self, text:str):
         new_text = ""
         get_first_coincidence = False
         for word in text.split():
             if (
-                self._normalized_text_with_keyword(word).lower() == self.normalized_keyword() 
+                self._normalized_text_with_keyword(word).lower() == self.voice_listener.normalized_keyword 
                 and not get_first_coincidence):
                 get_first_coincidence = True
             else:
@@ -73,7 +66,7 @@ class SimpleVoiceAssist(SimpleAssist):
     
     # Loop temporal
     def _on_keyword(self, text: str):
-        print(f"Detected word `{text}`. Objetive: `{self.keyword}`")
+        print(f"Keyword detected. First captured text `{text}` (ignored). Keyword: `{self.voice_listener.keyword}`")
         self._wait_keyword = False
     
     def loop(self):

@@ -17,6 +17,7 @@
 - **LISTO**: Guardar el `simple_assist.toml`, al directorio de trabajo del asistente, ya que el `AGENTS.md` lo necesita para su contexto.
 - **LISTO**: Qt input simple, para escribirle al asistente.
 - **LISTO**: Construcción de prompt con `Speech to Text` usando vosk.
+- **LISTO**: Loop de escucha de palabra clave, usando vosk. Con `VoiceListener`.
 - **FALTA**: Limitar sesión a modo plan. Igual de todas maneras el run, cuando el build pregunta salir a hacer cosas de su dir de trabajo, pasa a obtener un no.
-- **FALTA**: `core, ConfigManager`, Tiene cargar los parámetros, y validar el tipo de dato de los parámetros en el `archivo.toml`.
-- **FALTA**: Loop de escuha de palabra clave, usando vosk.
+- **FALTA**: `core`, `ConfigManager`, Tiene cargar los parámetros, y validar el tipo de dato de los parámetros en el `archivo.toml`.
+- **FALTA**: Grabar palabras usando vosk, hasta que se haya silencio/energía de voz. (RMB + Vosk). Meterlo en `SpeechToText`.

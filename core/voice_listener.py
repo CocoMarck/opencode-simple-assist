@@ -31,13 +31,17 @@ class VoiceListener:
 
         self.microphone_recorder = microphone_recorder
         self.vosk_manager = vosk_manager
-        self.keyword = keyword.strip().lower()
+        self.keyword = keyword
         self.on_command = on_command
         self.command_timeout = command_timeout
 
         self._queue: queue.Queue[bytes] = queue.Queue(maxsize=200)
         self._stop_event = threading.Event()
         self._thread: threading.Thread | None = None
+    
+    @property
+    def normalized_keyword(self):
+        return self.keyword.lower().strip()
     
     # --- Hilo de audio: solo encola ---
     def _on_audio(self, indata, frames, time_info, status):
@@ -49,7 +53,7 @@ class VoiceListener:
     # --- Hilo worker ---
     def _run(self):
         state = _State.WAITING_KEYWORD
-        keyword_rec = self.vosk_manager.get_recognizer([self.keyword, "[unk]"])
+        keyword_rec = self.vosk_manager.get_recognizer([self.normalized_keyword, "[unk]"])
         command_rec = None
         deadline = 0.0
 
@@ -73,7 +77,7 @@ class VoiceListener:
                 else:
                     text = json.loads(keyword_rec.PartialResult()).get("partial", "")
             
-                if self.keyword in text:
+                if self.normalized_keyword in text:
                     command_rec = self.vosk_manager.get_recognizer()
                     deadline = time.monotonic() + self.command_timeout
                     state = _State.CAPTURING_COMMAND

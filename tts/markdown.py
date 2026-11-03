@@ -29,7 +29,7 @@ MATHEMATICAL_SYMBOLS = [
     "÷", "/",
 
     # Básicos Comparadores
-    "=", ">", "<", "≠", "≥", "≤", "⩲", "±", "±",
+    "=", ">", "<", "≠", "≥", "≤", "⩲", "±",
 
     # Básicos Porcentaje
     "%", "‰",
@@ -41,13 +41,14 @@ MATHEMATICAL_SYMBOLS = [
     "∆", "∑",
     
     # Sin ordenar
-    "⊘", "∈", "□", "∎", "≔", "ℝ", "⊹"
+    "⊘", "∈", "□", "∎", "≔", "ℝ", "⊹", "~"
 ]
 
 math_symbols_tags = {
     "⊘": "circled division slash", "∈": "belonging", 
     "□": "tombstone", "∎": "tombstone", "≔": "defined as", "ℝ": "number line", 
-    "⊹": "transposed conjugate matrix"
+    "⊹": "transposed conjugate matrix", "~": "virgulilla", "√": "square root", 
+    "∑": "capital sigma", "÷": "division", "/": "division", "⩲": "more than or equal to", "±": "more or less", "≥": "greater than or equal to", "≤": "less than or equal to"
 }
 
 def get_allowed_special_characters() -> list[str]:

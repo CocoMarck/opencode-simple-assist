@@ -177,7 +177,7 @@ def main():
     main_window = MainWindow(MAIN_WINDOW_UI_FILE, simple_assist, stt)
     main_window.show()
     sys.exit( app.exec() )
-test_listener = True
+test_listener = False
 if __name__ == '__main__':
     if test_listener:
         print("\n\nSTARTING TEST OF VOICE LISTENER...")
