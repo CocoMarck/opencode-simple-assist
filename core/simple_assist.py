@@ -94,11 +94,11 @@ class SimpleAssist:
             print(f"Session id: {session_id}")
             
             strip_result = self._normalize_strip_result(
-                self.open_code_manager.run_by_id, session_id=session_id, prompt=text, model=self.get_model())
+                self.open_code_manager.run_by_id, session_id=session_id, prompt=text, agent="plan", model=self.get_model())
         else:
             print("No existe la sesión, creando una nueva.")
             strip_result = self._normalize_strip_result(
-                self.open_code_manager.run_by_title, title=session_title, prompt=text, model=self.get_model())
+                self.open_code_manager.run_by_title, title=session_title, prompt=text, agent="plan", model=self.get_model())
 
         print(f"Raw result: \n{strip_result}\n")
         self.espeak_manager.speak( markdown.normalize(strip_result) )
