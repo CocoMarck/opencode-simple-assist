@@ -83,3 +83,7 @@ class MicrophoneRecorder:
             callback=self._callback
         )
         self._stream.start()
+    
+    def clear_external_callback(self):
+        if self._external_callback == None: return
+        self._external_callback = None

@@ -16,6 +16,7 @@ from core.microphone_recorder import MicrophoneRecorder
 from core.vosk_manager import VoskManager
 from core.speech_to_text import SpeechToText
 from core.voice_listener import VoiceListener
+from core.command_capturer import CommandCapturer
 
 # TTS
 from core.espeak_manager import EspeakManager
@@ -73,16 +74,13 @@ timeout = data["response_timeout_in_seconds"]
 microphone_recorder = MicrophoneRecorder(SAMPLE_RATE)
 
 # Inicializar stt
-wait_keyword = True
 model = Model("./models/vosk-model-small-es-0.42")
 vosk_manager = VoskManager(model, SAMPLE_RATE)
-def on_keyword(text: str):
-    print(f"Palabra `{text}` detectada. Intención: `{keyword}`")
-    global wait_keyword
-    wait_keyword = False
 voice_listener = VoiceListener(
     vosk_manager=vosk_manager, microphone_recorder=microphone_recorder,
-    keyword=keyword.lower().strip(), on_command=on_keyword)
+    keyword=keyword.lower().strip(), on_command=None)
+command_capturer = CommandCapturer(
+    vosk_manager=vosk_manager, microphone_recorder=microphone_recorder)
 stt = SpeechToText(
     vosk_manager=vosk_manager, microphone_recorder=microphone_recorder)
 
@@ -177,7 +175,7 @@ def main():
     main_window = MainWindow(MAIN_WINDOW_UI_FILE, simple_assist, stt)
     main_window.show()
     sys.exit( app.exec() )
-test_listener = False
+test_listener = True
 if __name__ == '__main__':
     if test_listener:
         print("\n\nSTARTING TEST OF VOICE LISTENER...")

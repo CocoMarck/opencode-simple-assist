@@ -14,6 +14,7 @@ class OpenCodeManager:
     def __init__(self, timeout: float, workdir: Path):
         self._timeout = timeout
         self._workdir = workdir
+        self.plan = True
     
     def get_models(self) -> list[str]:
         '''
@@ -109,13 +110,19 @@ class OpenCodeManager:
             raise Exception("The session title not exists")
         else:
             return identifier
+        
+    @property
+    def agent_text(self):
+        if self.plan: return "plan"
+        else: return "build"
 
     def run_by_title(self, title:str, prompt:str, model:str = "") -> subprocess:
         '''
         Simple. Crea sesiones. Si ya existe la session con ese titulo, igual crea una nueva.
         '''
         return subprocess.run([
-            "opencode", "run", "--dir", self._workdir, "--model", model, "--title", title, prompt], 
+            "opencode", "run", "--agent", self.agent_text, 
+            "--dir", self._workdir, "--model", model, "--title", title, prompt], 
             capture_output=True, text=True, timeout=self._timeout)
     
     def run_by_id(self, session_id:str, prompt: str, model:str=""):
@@ -123,6 +130,8 @@ class OpenCodeManager:
         Simple. Usa sesiones. Si no existe ese ID, crash.
         '''
         return subprocess.run([
-            "opencode", "run", "--dir", self._workdir, "--model", model, "--session", session_id, prompt], 
+            "opencode", "run", "--agent", self.agent_text,
+            "--dir", self._workdir, "--model", model, "--session", 
+            session_id, prompt], 
             capture_output=True, text=True, timeout=self._timeout)
 

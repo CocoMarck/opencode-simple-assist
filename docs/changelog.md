@@ -18,6 +18,10 @@
 - **LISTO**: Qt input simple, para escribirle al asistente.
 - **LISTO**: Construcción de prompt con `Speech to Text` usando vosk.
 - **LISTO**: Loop de escucha de palabra clave, usando vosk. Con `VoiceListener`.
-- **FALTA**: Limitar sesión a modo plan. Igual de todas maneras el run, cuando el build pregunta salir a hacer cosas de su dir de trabajo, pasa a obtener un no.
+- **LISTO**: Grabar palabras usando vosk, hasta que se haya silencio/energía de voz. (RMB + Vosk). Meterlo en `SpeechToText`. Se cree el modulo `CommandCapturer` para el stt.
+- **LISTO**: Limitar sesión a modo plan. Igual de todas maneras el run, cuando el build pregunta salir a hacer cosas de su dir de trabajo, pasa a obtener un no. Se debería hacer asi: `opencode run --agent plan "Tu instrucción o análisis de código aquí"`
+- **FALTA**: `CommandCapturer` Hacer `capture()` asíncrono. Y en el `SpeechToText` usarlo en una `func` de manera sincrona.
+
 - **FALTA**: `core`, `ConfigManager`, Tiene cargar los parámetros, y validar el tipo de dato de los parámetros en el `archivo.toml`.
-- **FALTA**: Grabar palabras usando vosk, hasta que se haya silencio/energía de voz. (RMB + Vosk). Meterlo en `SpeechToText`.
+- **FALTA**: Buscar y utilizar de default modelo de OpenCode rápido, y **limitado a modo plan**. Obligatorio, entre mas loco, mas locuras puede hacer.
+- **FALTA**: Detección de patrones repetidos en texto, y eliminarlos todos, y dejar solo uno. Ejemplo: `la vida.. la vida... la vida..` -> `la vida...`. Aveces las AI dicen cosas repetidas hasta el infinito. Este debe ser un modulo para el `tts`, probablemente se llame `PatternRemover`

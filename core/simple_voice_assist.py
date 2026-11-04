@@ -10,7 +10,8 @@ class SimpleVoiceAssist(SimpleAssist):
     Tiene para escuchar palabra clave. Se usa en un bucle.
     '''
     def __init__(
-        self, stt: SpeechToText, seconds: float, voice_listener: VoiceListener,*args, **kwargs):
+        self, stt: SpeechToText, seconds: float, voice_listener: VoiceListener, 
+        *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._stt = stt
         self._seconds = seconds
@@ -84,7 +85,8 @@ class SimpleVoiceAssist(SimpleAssist):
                     print("\n----------")
                     print(f"Speech to text, you have {self._seconds} seconds to speak.")
                     self.voice_listener.stop()
-                    text = self._stt.sync_recording_with_seconds(self._seconds).strip()
+                    #text = self._stt.sync_recording_with_seconds(self._seconds).strip()
+                    text = self._stt.speech_to_text_until_silence()
                     print("text:", text)
                     print("----------\n")
                     self.request(text)
