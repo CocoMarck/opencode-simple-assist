@@ -1,27 +1,46 @@
 # Changelog
 - **LISTO**: Mandarle una ordenes a opencode, con run.
+
 - **LISTO** TTS, espeak obtiene output de opencode, y lo lee.
+
 - **LISTO**: Crear sesión fija al dia.
+
 - **LISTO**: Palabra clave al principio de frase, para recibir orden. Ejemplo: `Asistente, abre el navegador web.`. Esto servirá para tener una dizque contraseña.
+
 - **LISTO**: Normalizar texto para el TTS. (Especificación en [tts-normalizer.md](./tts-normalizer.md))
     - Debe leer ABC, números, símbolos comunes (@,#,>,<), y de matemáticas .
     - No debe leer palabras con mas de 100 caracteres.
     - Debe entender el estilo markdown. Transcribir lo que sea posible a texto legible, como por ejemplo: "caja de código", para las triple comillas invertidas.
+
 - **LISTO**: Directorio especial para el Asistente (El sandbox del asistente).
+
 - **LISTO**: `AGENTS.md` especial para el asistente general.
+
 - **LISTO**: Archivo de configuración:
     - Modelo (Si no existe pasa a default, esto lo maneja por completo OpenCode).
     - Memoria de sesiones (1 dia por defecto/obligado).
     - Timeout de proceso run de opencode (por defecto un minuto).
+
 - **LISTO**: `SimpleAssist`, memoria en días, obtener la ultima sesión disponible del transcurso de `x` cantidad de días. Ejemplo, de 20 días de posibles sesiones, seleccionar la ultima sesión existente.
+
 - **LISTO**: Guardar el `simple_assist.toml`, al directorio de trabajo del asistente, ya que el `AGENTS.md` lo necesita para su contexto.
+
 - **LISTO**: Qt input simple, para escribirle al asistente.
+
 - **LISTO**: Construcción de prompt con `Speech to Text` usando vosk.
+
 - **LISTO**: Loop de escucha de palabra clave, usando vosk. Con `VoiceListener`.
+
 - **LISTO**: Grabar palabras usando vosk, hasta que se haya silencio/energía de voz. (RMB + Vosk). Meterlo en `SpeechToText`. Se cree el modulo `CommandCapturer` para el stt.
+
 - **LISTO**: Limitar sesión a modo plan. Igual de todas maneras el run, cuando el build pregunta salir a hacer cosas de su dir de trabajo, pasa a obtener un no. Se debería hacer asi: `opencode run --agent plan "Tu instrucción o análisis de código aquí"`
+
+- **LISTO**: Añadir sonido indicador para hablar. Esta en `SimpleVoiceAssist`.
+
 - **FALTA**: `CommandCapturer` Hacer `capture()` asíncrono. Y en el `SpeechToText` usarlo en una `func` de manera sincrona.
 
 - **FALTA**: `core`, `ConfigManager`, Tiene cargar los parámetros, y validar el tipo de dato de los parámetros en el `archivo.toml`.
+
 - **FALTA**: Buscar y utilizar de default modelo de OpenCode rápido, y **limitado a modo plan**. Obligatorio, entre mas loco, mas locuras puede hacer.
+
 - **FALTA**: Detección de patrones repetidos en texto, y eliminarlos todos, y dejar solo uno. Ejemplo: `la vida.. la vida... la vida..` -> `la vida...`. Aveces las AI dicen cosas repetidas hasta el infinito. Este debe ser un modulo para el `tts`, probablemente se llame `PatternRemover`

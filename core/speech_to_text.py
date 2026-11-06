@@ -18,7 +18,8 @@ class SpeechToText:
         self._microphone_recorder = microphone_recorder
         self._rms_threshold = None
         self._command_capturer = CommandCapturer(
-            self._vosk_manager, self._microphone_recorder)
+            self._vosk_manager, self._microphone_recorder, 
+            silence_ms=1000, max_duration_s=60)
 
     def start_recording(self):
         self._microphone_recorder.start()

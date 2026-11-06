@@ -85,6 +85,7 @@ class SimpleVoiceAssist(SimpleAssist):
                     print("\n----------")
                     print(f"Speech to text, you have {self._seconds} seconds to speak.")
                     self.voice_listener.stop()
+                    self.espeak_manager.speak("talk") # Sonido indicador
                     #text = self._stt.sync_recording_with_seconds(self._seconds).strip()
                     text = self._stt.speech_to_text_until_silence()
                     print("text:", text)

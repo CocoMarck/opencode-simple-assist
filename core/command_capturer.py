@@ -6,6 +6,16 @@ from core.vosk_manager import VoskManager
 from core.microphone_recorder import MicrophoneRecorder
 
 class CommandCapturer:
+    '''
+    `CommandCapturer`
+    - `silence_ms`: Milisegundos de silencio detectado, y parar captura. Es el tiempo máximo sin voz desde la última vez que hubo energía por encima de `rms_threshold`.
+    
+    - `min_speach_ms`: Milisegundos de duración mínima de discurso. Es el tiempo mínimo total desde que se detectó voz por primera vez.
+    
+    - `max_duration_s`: Duración máxima de discurso en segundos. Es por seguridad, si se menor o igual a cero es infinito.
+
+    - `rms_threshold`: Umbral de energía (volumen) del audio para decidir si hay voy o no. RMS (Root Mean Squere).
+    '''
     def __init__(
         self, vosk_manager: VoskManager, microphone_recorder: MicrophoneRecorder,
         silence_ms: int=800, min_speech_ms: int=250, max_duration_s: int=10,
@@ -79,7 +89,9 @@ class CommandCapturer:
                 elapsed_total = now - self._start_time
 
                 # Límite máximo de seguridad
-                if elapsed_total > self.max_duration_s:
+                if (
+                    (elapsed_total > self.max_duration_s) and 
+                    (self.max_duration_s > 0) ):
                     break
                 
                 # No empezar a contar silencio hasta haber hablado al menos un poco
